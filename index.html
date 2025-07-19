@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Audio Reactive Visualizer</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #drop-zone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 2px dashed #444;
+            box-sizing: border-box;
+            transition: background-color 0.3s, border-color 0.3s, opacity 0.5s;
+            z-index: 10;
+            opacity: 1;
+        }
+        #drop-zone.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #drop-zone.dragover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+        }
+        #drop-zone p {
+            font-size: 1.5rem;
+            pointer-events: none; /* Make text non-interactive */
+        }
+        #audio-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 10px;
+            display: none; /* Hidden by default */
+        }
+        audio {
+            width: 300px;
+        }
+
+        /* --- Hamburger Menu & Sidebar --- */
+        #menu-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #555;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+        #menu-toggle .bar {
+            width: 100%;
+            height: 2px;
+            background: white;
+            transition: all 0.3s ease-in-out;
+        }
+        #menu-toggle.open .bar1 {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        #menu-toggle.open .bar2 {
+            opacity: 0;
+        }
+        #menu-toggle.open .bar3 {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        #controls-panel {
+            position: absolute;
+            top: 0;
+            left: -300px; /* Hidden by default */
+            width: 280px;
+            height: 100%;
+            background: rgba(20, 20, 20, 0.9);
+            z-index: 1000;
+            padding: 70px 10px 10px 10px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            transition: left 0.3s ease-in-out;
+            overflow-y: auto; /* Enables scrolling */
+            box-sizing: border-box; 
+        }
+        #controls-panel.open {
+            left: 0;
+        }
+        .control-group {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 15px;
+        }
+        .control-group:last-child {
+            border-bottom: none;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            color: #0af;
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+        }
+        .control-group input[type="color"] {
+            width: 100%;
+            height: 30px;
+            border: none;
+            padding: 0;
+            background: none;
+            cursor: pointer;
+        }
+        .control-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Menu Toggle Button -->
+    <div id="menu-toggle">
+        <div class="bar bar1"></div>
+        <div class="bar bar2"></div>
+        <div class="bar bar3"></div>
+    </div>
+
+    <!-- Controls Sidebar -->
+    <div id="controls-panel">
+        <div class="control-group">
+            <h3>Bass Light</h3>
+            <label for="bass-intensity">Intensity</label>
+            <input type="range" id="bass-intensity" min="0" max="10" step="0.1" value="5">
+            <label for="bass-color">Color</label>
+            <input type="color" id="bass-color" value="#ff0000">
+        </div>
+        <div class="control-group">
+            <h3>Treble Light</h3>
+            <label for="treble-intensity">Intensity</label>
+            <input type="range" id="treble-intensity" min="0" max="10" step="0.1" value="3">
+            <label for="treble-color">Color</label>
+            <input type="color" id="treble-color" value="#0000ff">
+        </div>
+        <div class="control-group">
+            <h3>Lasers</h3>
+            <label for="laser-opacity">Opacity</label>
+            <input type="range" id="laser-opacity" min="0" max="1" step="0.01" value="0.7">
+        </div>
+        <div class="control-group">
+            <h3>Bloom Effect</h3>
+            <label for="bloom-strength">Strength</label>
+            <input type="range" id="bloom-strength" min="0" max="3" step="0.1" value="1.2">
+            <label for="bloom-threshold">Threshold</label>
+            <input type="range" id="bloom-threshold" min="0" max="1" step="0.01" value="0.2">
+        </div>
+        <div class="control-group">
+            <h3>Volumetric Light</h3>
+            <label for="volumetric-toggle"><span>Enable</span><input type="checkbox" id="volumetric-toggle" checked></label>
+            <label for="volumetric-intensity">Intensity</label>
+            <input type="range" id="volumetric-intensity" min="0" max="50" step="0.1" value="15">
+            <label for="volumetric-color">Color</label>
+            <input type="color" id="volumetric-color" value="#ffffff">
+        </div>
+        <div class="control-group">
+            <h3>Model Distortion</h3>
+            <label for="wave-frequency">Max Wave Frequency</label>
+            <input type="range" id="wave-frequency" min="0" max="20" step="0.1" value="4.0">
+            <label for="wave-amplitude">Amplitude</label>
+            <input type="range" id="wave-amplitude" min="0" max="2" step="0.05" value="1.0">
+        </div>
+        <div class="control-group">
+            <h3>Glitch Effect</h3>
+            <label for="glitch-intensity">Intensity</label>
+            <input type="range" id="glitch-intensity" min="0" max="1" step="0.01" value="0.5">
+            <label for="glitch-threshold">Threshold</label>
+            <input type="range" id="glitch-threshold" min="0" max="1" step="0.01" value="0.8">
+        </div>
+        <div class="control-group">
+            <h3>Projectile Impact</h3>
+            <label for="projectile-toggle"><span>Enable</span><input type="checkbox" id="projectile-toggle" checked></label>
+            <label for="projectile-speed">Speed</label>
+            <input type="range" id="projectile-speed" min="0.1" max="2" step="0.1" value="0.8">
+            <label for="projectile-force">Impact Force</label>
+            <input type="range" id="projectile-force" min="0" max="5" step="0.1" value="1.5">
+            <label for="projectile-radius">Impact Radius</label>
+            <input type="range" id="projectile-radius" min="0.1" max="3" step="0.1" value="1.0">
+            <label for="debris-density">Debris Density %</label>
+            <input type="range" id="debris-density" min="1" max="100" step="1" value="50">
+            <label for="projectile-heal">Heal Speed</label>
+            <input type="range" id="projectile-heal" min="0.01" max="0.2" step="0.01" value="0.05">
+            <label for="projectile-heal-color">Heal Color</label>
+            <input type="color" id="projectile-heal-color" value="#00ffff">
+        </div>
+        <div class="control-group">
+            <h3>Audio Player</h3>
+            <div id="audio-controls" style="margin-bottom: 15px;">
+                <audio id="audio" controls style="width: 100%; height: 40px;"></audio>
+            </div>
+            <div id="seeking-controls" style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <span id="current-time" style="font-size: 0.8em; color: #888;">0:00</span>
+                    <span id="total-time" style="font-size: 0.8em; color: #888;">0:00</span>
+                </div>
+                <input type="range" id="audio-seek" min="0" max="100" step="0.1" value="0" style="width: 100%;">
+                <div style="display: flex; gap: 5px; margin-top: 8px;">
+                    <button id="seek-backward-10" style="flex: 1; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 0.8em;">-10s</button>
+                    <button id="seek-backward-30" style="flex: 1; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 0.8em;">-30s</button>
+                    <button id="seek-forward-30" style="flex: 1; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 0.8em;">+30s</button>
+                    <button id="seek-forward-10" style="flex: 1; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 0.8em;">+10s</button>
+                </div>
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <button id="seek-to-start" style="flex: 1; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 0.8em;">Start</button>
+                    <button id="seek-to-end" style="flex: 1; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 0.8em;">End</button>
+                </div>
+            </div>
+            <label for="audio-volume">Volume</label>
+            <input type="range" id="audio-volume" min="0" max="1" step="0.01" value="0.7" style="width: 100%;">
+            <label for="audio-playback-rate">Playback Speed</label>
+            <select id="audio-playback-rate" style="width: 100%; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px;">
+                <option value="0.5">0.5x (Slow)</option>
+                <option value="0.75">0.75x</option>
+                <option value="1" selected>1x (Normal)</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x (Fast)</option>
+                <option value="2">2x (Very Fast)</option>
+            </select>
+            <button id="audio-loop" style="width: 100%; padding: 6px; margin-top: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer;">Loop: Off</button>
+        </div>
+        <div class="control-group">
+            <h3>Video Recording</h3>
+            <button id="record-button" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer;">Start Recording</button>
+            <div id="recording-status" style="text-align: center; font-size: 0.9em; color: #888; margin-bottom: 10px;"></div>
+            <div id="audio-status" style="text-align: center; font-size: 0.8em; color: #666; margin-bottom: 10px;"></div>
+            <label for="video-quality">Quality</label>
+            <select id="video-quality" style="width: 100%; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px;">
+                <option value="high">High Quality</option>
+                <option value="medium" selected>Medium Quality</option>
+                <option value="low">Low Quality</option>
+            </select>
+            <label for="video-fps">FPS</label>
+            <select id="video-fps" style="width: 100%; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px;">
+                <option value="60">60 FPS</option>
+                <option value="30" selected>30 FPS</option>
+                <option value="24">24 FPS</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="drop-zone">
+        <p>Drop a 3D Model (.glb) & an Audio File (.mp3)</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { Reflector } from 'three/addons/objects/Reflector.js';
+
+        let scene, camera, renderer, controls, composer, bloomPass;
+        let analyser, dataArray;
+        let audioContext = null;
+        let loadedModel = null, isAudioReady = false;
+        let originalVertices = new Map();
+        let time = 0;
+        let smoothedBass = 0, smoothedMids = 0, smoothedTreble = 0, smoothedHighMids = 0;
+        let ambientLight, bassLight, trebleLight, laser1, laser2, volumetricLight;
+        let glitchAmount = 0;
+        
+        let healingZones = [];
+        let debrisParticles = new THREE.Group();
+        let projectiles = new THREE.Group();
+        let trails = new THREE.Group();
+        let atmosphericParticles;
+        let lastProjectileTime = 0;
+        let lastSmoothedBass = 0;
+        let modelBoundingBox = new THREE.Box3();
+        
+        // Video recording variables
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+        let recordingStartTime = 0;
+
+        const dropZone = document.getElementById('drop-zone');
+        const dropZoneText = dropZone.querySelector('p');
+        const audioElement = document.getElementById('audio');
+
+        function setupDragAndDrop() {
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
+            });
+        }
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            scene.add(debrisParticles, projectiles, trails);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 2, 8);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.target.set(0, 1, 0);
+
+            // Lighting Setup
+            ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+            scene.add(ambientLight);
+            bassLight = new THREE.SpotLight(0xff0000, 0, 0, Math.PI / 4, 0.5, 2);
+            trebleLight = new THREE.SpotLight(0x0000ff, 0, 0, Math.PI / 4, 0.5, 2);
+            volumetricLight = new THREE.SpotLight(0xffffff, 0, 0, Math.PI / 3, 0.3, 2);
+            scene.add(bassLight, bassLight.target, trebleLight, trebleLight.target, volumetricLight, volumetricLight.target);
+            
+            // Laser Beams
+            const laserGeometry = new THREE.CylinderGeometry(0.02, 0.02, 20, 32);
+            const laserMaterial1 = new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.5 });
+            const laserMaterial2 = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.5 });
+            laser1 = new THREE.Mesh(laserGeometry, laserMaterial1);
+            laser2 = new THREE.Mesh(laserGeometry, laserMaterial2);
+            laser1.position.set(-4, -5, -5);
+            laser2.position.set(4, -5, -5);
+            laser1.rotation.x = Math.PI / 2.5;
+            laser2.rotation.x = Math.PI / 2.5;
+            scene.add(laser1, laser2);
+
+            // --- NEW: Reflective Floor ---
+            const floorGeometry = new THREE.PlaneGeometry(30, 30);
+            const groundMirror = new Reflector(floorGeometry, {
+                clipBias: 0.003,
+                textureWidth: window.innerWidth * window.devicePixelRatio,
+                textureHeight: window.innerHeight * window.devicePixelRatio,
+                color: 0x777777
+            });
+            groundMirror.position.y = -2;
+            groundMirror.rotateX(-Math.PI / 2);
+            scene.add(groundMirror);
+
+            // --- NEW: Atmospheric Particles ---
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCnt = 5000;
+            const posArray = new Float32Array(particlesCnt * 3);
+            for(let i = 0; i < particlesCnt * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 20;
+            }
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.015,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.5
+            });
+            atmosphericParticles = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(atmosphericParticles);
+
+            // Post-processing
+            const renderScene = new RenderPass(scene, camera);
+            bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+            composer = new EffectComposer(renderer);
+            composer.addPass(renderScene);
+            composer.addPass(bloomPass);
+
+            window.addEventListener('resize', onWindowResize, false);
+            setupUIControls();
+            setupDragAndDrop();
+            animate();
+        }
+
+        function setupAudioContext() {
+            if (analyser) return; 
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioContext.createMediaElementSource(audioElement);
+            analyser = audioContext.createAnalyser();
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+            analyser.fftSize = 512; 
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+        }
+
+        function setupUIControls() {
+            const menuToggle = document.getElementById('menu-toggle');
+            const controlsPanel = document.getElementById('controls-panel');
+            menuToggle.addEventListener('click', () => {
+                menuToggle.classList.toggle('open');
+                controlsPanel.classList.toggle('open');
+            });
+
+            document.getElementById('bass-color').addEventListener('input', (e) => bassLight.color.set(e.target.value));
+            document.getElementById('treble-color').addEventListener('input', (e) => trebleLight.color.set(e.target.value));
+            document.getElementById('volumetric-color').addEventListener('input', (e) => volumetricLight.color.set(e.target.value));
+            document.getElementById('bloom-strength').addEventListener('input', (e) => bloomPass.strength = Number(e.target.value));
+            document.getElementById('bloom-threshold').addEventListener('input', (e) => bloomPass.threshold = Number(e.target.value));
+            
+            document.getElementById('projectile-heal-color').addEventListener('input', (e) => {
+                if (loadedModel) {
+                    loadedModel.traverse(child => {
+                        if (child.isMesh && child.material.uniforms && child.material.uniforms.healingColor) {
+                            child.material.uniforms.healingColor.value.set(e.target.value);
+                        }
+                    });
+                }
+            });
+            
+            // Video recording controls
+            setupVideoRecording();
+            
+            // Audio controls
+            setupAudioControls();
+        }
+        
+        function setupVideoRecording() {
+            const recordButton = document.getElementById('record-button');
+            const recordingStatus = document.getElementById('recording-status');
+            
+            recordButton.addEventListener('click', () => {
+                if (!isRecording) {
+                    startRecording();
+                } else {
+                    stopRecording();
+                }
+            });
+        }
+        
+        async function startRecording() {
+            try {
+                const canvas = renderer.domElement;
+                const videoStream = canvas.captureStream(parseInt(document.getElementById('video-fps').value));
+                
+                // Get audio stream from the audio element
+                let audioStream = null;
+                const audioStatus = document.getElementById('audio-status');
+                
+                if (audioElement.src && !audioElement.paused && audioContext) {
+                    try {
+                        // Create a MediaStream destination from the existing audio context
+                        const destination = audioContext.createMediaStreamDestination();
+                        
+                        // Connect the existing analyser to the destination for recording
+                        analyser.connect(destination);
+                        
+                        // Get the audio stream
+                        audioStream = destination.stream;
+                        
+                        audioStatus.textContent = '✅ Audio will be recorded';
+                        audioStatus.style.color = '#00ff00';
+                    } catch (audioError) {
+                        console.warn('Could not capture audio stream:', audioError);
+                        audioStatus.textContent = '⚠️ Audio recording not available';
+                        audioStatus.style.color = '#ffaa00';
+                    }
+                } else if (!audioContext) {
+                    audioStatus.textContent = '⚠️ Audio context not initialized';
+                    audioStatus.style.color = '#ffaa00';
+                } else {
+                    audioStatus.textContent = '⚠️ No audio playing - video only';
+                    audioStatus.style.color = '#ffaa00';
+                }
+                
+                // Combine video and audio streams
+                const combinedStream = new MediaStream();
+                
+                // Add video tracks
+                videoStream.getVideoTracks().forEach(track => {
+                    combinedStream.addTrack(track);
+                });
+                
+                // Add audio tracks if available
+                if (audioStream) {
+                    audioStream.getAudioTracks().forEach(track => {
+                        combinedStream.addTrack(track);
+                    });
+                }
+                
+                const quality = document.getElementById('video-quality').value;
+                let mimeType = 'video/webm;codecs=vp9,opus';
+                let bitrate = 5000000; // 5 Mbps default
+                
+                switch(quality) {
+                    case 'high':
+                        bitrate = 10000000; // 10 Mbps
+                        mimeType = 'video/webm;codecs=vp9,opus';
+                        break;
+                    case 'medium':
+                        bitrate = 5000000; // 5 Mbps
+                        mimeType = 'video/webm;codecs=vp9,opus';
+                        break;
+                    case 'low':
+                        bitrate = 2000000; // 2 Mbps
+                        mimeType = 'video/webm;codecs=vp8,vorbis';
+                        break;
+                }
+                
+                const options = {
+                    mimeType: mimeType,
+                    videoBitsPerSecond: bitrate
+                };
+                
+                mediaRecorder = new MediaRecorder(combinedStream, options);
+                recordedChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `3d-audio-visualizer-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.webm`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                recordingStartTime = Date.now();
+                
+                document.getElementById('record-button').textContent = 'Stop Recording';
+                document.getElementById('record-button').style.background = '#ff4444';
+                
+                updateRecordingStatus();
+                
+            } catch (error) {
+                console.error('Failed to start recording:', error);
+                alert('Failed to start recording. Please check browser permissions.');
+            }
+        }
+        
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                document.getElementById('record-button').textContent = 'Start Recording';
+                document.getElementById('record-button').style.background = '#333';
+                
+                const recordingStatus = document.getElementById('recording-status');
+                recordingStatus.textContent = 'Recording saved!';
+                recordingStatus.style.color = '#00ff00';
+                
+                const audioStatus = document.getElementById('audio-status');
+                audioStatus.textContent = '';
+                
+                setTimeout(() => {
+                    recordingStatus.textContent = '';
+                }, 3000);
+            }
+        }
+        
+        function updateRecordingStatus() {
+            if (!isRecording) return;
+            
+            const recordingStatus = document.getElementById('recording-status');
+            const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            recordingStatus.textContent = `Recording... ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            recordingStatus.style.color = '#ff4444';
+            
+            requestAnimationFrame(updateRecordingStatus);
+        }
+        
+        function setupAudioControls() {
+            const volumeSlider = document.getElementById('audio-volume');
+            const playbackRateSelect = document.getElementById('audio-playback-rate');
+            const loopButton = document.getElementById('audio-loop');
+            const seekSlider = document.getElementById('audio-seek');
+            const currentTimeSpan = document.getElementById('current-time');
+            const totalTimeSpan = document.getElementById('total-time');
+            
+            // Volume control
+            volumeSlider.addEventListener('input', (e) => {
+                audioElement.volume = parseFloat(e.target.value);
+            });
+            
+            // Playback rate control
+            playbackRateSelect.addEventListener('change', (e) => {
+                audioElement.playbackRate = parseFloat(e.target.value);
+            });
+            
+            // Loop control
+            loopButton.addEventListener('click', () => {
+                audioElement.loop = !audioElement.loop;
+                loopButton.textContent = audioElement.loop ? 'Loop: On' : 'Loop: Off';
+                loopButton.style.background = audioElement.loop ? '#00aa00' : '#333';
+            });
+            
+            // Seeking controls
+            let isSeeking = false;
+            
+            // Update time display and seek slider
+            function updateTimeDisplay() {
+                if (audioElement.duration && !isNaN(audioElement.duration)) {
+                    const currentTime = audioElement.currentTime;
+                    const totalTime = audioElement.duration;
+                    
+                    // Update time displays
+                    currentTimeSpan.textContent = formatTime(currentTime);
+                    totalTimeSpan.textContent = formatTime(totalTime);
+                    
+                    // Update seek slider
+                    if (!isSeeking) {
+                        seekSlider.value = (currentTime / totalTime) * 100;
+                    }
+                }
+            }
+            
+            // Format time as MM:SS
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+            
+            // Seek slider events
+            seekSlider.addEventListener('mousedown', () => {
+                isSeeking = true;
+            });
+            
+            seekSlider.addEventListener('input', (e) => {
+                if (audioElement.duration && !isNaN(audioElement.duration)) {
+                    const seekTime = (parseFloat(e.target.value) / 100) * audioElement.duration;
+                    audioElement.currentTime = seekTime;
+                    currentTimeSpan.textContent = formatTime(seekTime);
+                }
+            });
+            
+            seekSlider.addEventListener('mouseup', () => {
+                isSeeking = false;
+            });
+            
+            // Quick seek buttons
+            document.getElementById('seek-backward-10').addEventListener('click', () => {
+                audioElement.currentTime = Math.max(0, audioElement.currentTime - 10);
+            });
+            
+            document.getElementById('seek-backward-30').addEventListener('click', () => {
+                audioElement.currentTime = Math.max(0, audioElement.currentTime - 30);
+            });
+            
+            document.getElementById('seek-forward-30').addEventListener('click', () => {
+                audioElement.currentTime = Math.min(audioElement.duration, audioElement.currentTime + 30);
+            });
+            
+            document.getElementById('seek-forward-10').addEventListener('click', () => {
+                audioElement.currentTime = Math.min(audioElement.duration, audioElement.currentTime + 10);
+            });
+            
+            document.getElementById('seek-to-start').addEventListener('click', () => {
+                audioElement.currentTime = 0;
+            });
+            
+            document.getElementById('seek-to-end').addEventListener('click', () => {
+                audioElement.currentTime = audioElement.duration;
+            });
+            
+            // Update time display periodically
+            audioElement.addEventListener('timeupdate', updateTimeDisplay);
+            audioElement.addEventListener('loadedmetadata', updateTimeDisplay);
+            
+            // Set initial volume
+            audioElement.volume = 0.7;
+        }
+
+        function handleFiles(files) {
+            for (const file of files) {
+                const fileName = file.name.toLowerCase();
+                if (fileName.endsWith('.glb') || fileName.endsWith('.gltf')) loadModel(file);
+                else if (fileName.endsWith('.mp3') || fileName.endsWith('.wav') || fileName.endsWith('.ogg')) loadAudio(file);
+            }
+        }
+
+        function loadModel(file) {
+            const loader = new GLTFLoader();
+            const url = URL.createObjectURL(file);
+            loader.load(url, (gltf) => {
+                if (loadedModel) scene.remove(loadedModel);
+                loadedModel = gltf.scene;
+                
+                const box = new THREE.Box3().setFromObject(loadedModel);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 5 / maxDim;
+                
+                loadedModel.scale.set(scale, scale, scale);
+                loadedModel.position.sub(center.multiplyScalar(scale));
+                
+                modelBoundingBox.setFromObject(loadedModel); 
+                
+                loadedModel.traverse((child) => {
+                    if (child.isMesh) {
+                        child.geometry.computeVertexNormals();
+                        const alphaArray = new Float32Array(child.geometry.attributes.position.count).fill(1.0);
+                        child.geometry.setAttribute('alpha', new THREE.BufferAttribute(alphaArray, 1));
+
+                        child.material.onBeforeCompile = shader => {
+                            shader.uniforms.healingColor = { value: new THREE.Color(document.getElementById('projectile-heal-color').value) };
+                            shader.vertexShader = 'attribute float alpha;\nvarying float vAlpha;\n' + shader.vertexShader;
+                            shader.vertexShader = shader.vertexShader.replace(
+                                '#include <begin_vertex>',
+                                '#include <begin_vertex>\nvAlpha = alpha;'
+                            );
+                            shader.fragmentShader = 'varying float vAlpha;\nuniform vec3 healingColor;\n' + shader.fragmentShader;
+                            shader.fragmentShader = shader.fragmentShader.replace(
+                                /}\s*$/,
+                                `   if (vAlpha < 1.0) {
+                                        if (vAlpha <= 0.0) discard;
+                                        gl_FragColor.a *= vAlpha;
+                                        // Only show healing glow when alpha is between 0.1 and 0.9 (healing front)
+                                        if (vAlpha > 0.1 && vAlpha < 0.9) {
+                                            float edge = smoothstep(0.1, 0.3, vAlpha) - smoothstep(0.7, 0.9, vAlpha);
+                                            gl_FragColor.rgb += healingColor * edge * 2.0;
+                                        }
+                                    }
+                                }`
+                            );
+                        };
+                        child.material.transparent = true;
+                        child.material.needsUpdate = true;
+
+                        originalVertices.set(child.uuid, {
+                            positions: child.geometry.attributes.position.array.slice(),
+                            normals: child.geometry.attributes.normal.array.slice()
+                        });
+                    }
+                });
+                scene.add(loadedModel);
+
+                const modelCenter = new THREE.Vector3();
+                box.getCenter(modelCenter);
+                const modelSize = box.getSize(new THREE.Vector3());
+
+                bassLight.position.set(modelCenter.x - modelSize.x * 1.5, modelCenter.y + modelSize.y, modelCenter.z);
+                bassLight.target.position.copy(modelCenter);
+                bassLight.distance = modelSize.x * 5;
+
+                trebleLight.position.set(modelCenter.x + modelSize.x * 1.5, modelCenter.y + modelSize.y, modelCenter.z);
+                trebleLight.target.position.copy(modelCenter);
+                trebleLight.distance = modelSize.x * 5;
+
+                volumetricLight.position.set(modelCenter.x, modelCenter.y + modelSize.y * 2, modelCenter.z + modelSize.z);
+                volumetricLight.target.position.copy(modelCenter);
+                volumetricLight.distance = modelSize.y * 5;
+
+                URL.revokeObjectURL(url);
+                updateDropZoneStatus();
+            }, undefined, (error) => {
+                console.error('An error happened:', error);
+                if(dropZoneText) dropZoneText.textContent = 'Failed to load 3D model.';
+            });
+        }
+
+        function loadAudio(file) {
+            const url = URL.createObjectURL(file);
+            audioElement.src = url;
+            audioElement.load();
+            audioElement.play().catch(e => console.error("Autoplay blocked:", e));
+            if (!analyser) setupAudioContext();
+            isAudioReady = true;
+            updateDropZoneStatus();
+        }
+        
+        function updateDropZoneStatus() {
+            if (loadedModel && isAudioReady) dropZone.classList.add('hidden');
+            else if (loadedModel) dropZoneText.textContent = 'Drop an Audio File (.mp3)';
+            else if (isAudioReady) dropZoneText.textContent = 'Drop a 3D Model (.glb)';
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const now = performance.now();
+            controls.update();
+
+            glitchAmount *= 0.9; 
+            updateProjectilesAndHealing();
+            
+            if (atmosphericParticles) {
+                atmosphericParticles.rotation.y += 0.0005;
+            }
+
+            if (!controls.autoRotate) {
+                camera.position.x = Math.sin(time * 0.1) * 8;
+                camera.position.z = Math.cos(time * 0.1) * 8;
+                camera.lookAt(0,1,0);
+            }
+
+
+            if (analyser && dataArray) {
+                analyser.getByteFrequencyData(dataArray);
+                const freqCount = analyser.frequencyBinCount;
+                
+                const bassSliceEnd = Math.floor(freqCount * 0.1);
+                const midsSliceStart = bassSliceEnd;
+                const midsSliceEnd = Math.floor(freqCount * 0.4);
+                const highMidsSliceStart = midsSliceEnd;
+                const highMidsSliceEnd = Math.floor(freqCount * 0.7);
+                const trebleSliceStart = highMidsSliceEnd;
+
+                const bassSlice = dataArray.slice(0, bassSliceEnd);
+                const midsSlice = dataArray.slice(midsSliceStart, midsSliceEnd);
+                const highMidsSlice = dataArray.slice(highMidsSliceStart, highMidsSliceEnd);
+                const trebleSlice = dataArray.slice(trebleSliceStart, freqCount);
+
+                const bassAvg = bassSlice.reduce((a, b) => a + b, 0) / (bassSlice.length || 1);
+                const midsAvg = midsSlice.reduce((a, b) => a + b, 0) / (midsSlice.length || 1);
+                const highMidsAvg = highMidsSlice.reduce((a, b) => a + b, 0) / (highMidsSlice.length || 1);
+                const trebleAvg = trebleSlice.reduce((a, b) => a + b, 0) / (trebleSlice.length || 1);
+                
+                const normalizedHighMids = highMidsAvg / 255.0;
+                const normalizedBass = bassAvg / 255.0;
+                
+                const glitchThreshold = Number(document.getElementById('glitch-threshold').value);
+                if (normalizedHighMids > smoothedHighMids + (1 - glitchThreshold) * 0.5) {
+                    glitchAmount = 1.0;
+                }
+
+                if (document.getElementById('projectile-toggle').checked && 
+                    normalizedBass > lastSmoothedBass + 0.15 && 
+                    now - lastProjectileTime > 200) { 
+                    fireProjectile();
+                    lastProjectileTime = now;
+                }
+
+                lastSmoothedBass = smoothedBass;
+                smoothedBass = THREE.MathUtils.lerp(smoothedBass, normalizedBass, 0.1);
+                smoothedMids = THREE.MathUtils.lerp(smoothedMids, midsAvg / 255.0, 0.1);
+                smoothedHighMids = THREE.MathUtils.lerp(smoothedHighMids, normalizedHighMids, 0.2);
+                smoothedTreble = THREE.MathUtils.lerp(smoothedTreble, trebleAvg / 255.0, 0.1);
+                
+                time += (0.002 + smoothedMids * 0.03);
+
+                if (loadedModel) updateModelVertices();
+                updateLights();
+            }
+
+            composer.render();
+        }
+
+        function updateLights() {
+            ambientLight.intensity = smoothedMids * 0.5;
+            bassLight.intensity = smoothedBass * document.getElementById('bass-intensity').value;
+            trebleLight.intensity = smoothedTreble * document.getElementById('treble-intensity').value;
+            
+            const isVolumetricOn = document.getElementById('volumetric-toggle').checked;
+            volumetricLight.intensity = isVolumetricOn ? (smoothedMids * 0.5 + 0.4) * document.getElementById('volumetric-intensity').value : 0;
+            
+            const laserOpacity = document.getElementById('laser-opacity').value;
+            laser1.material.opacity = smoothedBass * laserOpacity;
+            laser1.material.color.setHSL(time % 1, 1, 0.5);
+            laser1.rotation.z = time * 0.2;
+            laser2.material.opacity = smoothedTreble * laserOpacity;
+            laser2.material.color.setHSL((time + 0.5) % 1, 1, 0.5);
+            laser2.rotation.z = time * -0.2;
+        }
+        
+        function fireProjectile() {
+            if (modelBoundingBox.isEmpty()) return;
+
+            const speed = Number(document.getElementById('projectile-speed').value);
+            const projectileGeo = new THREE.SphereGeometry(0.1, 8, 8);
+            const projectileMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const projectile = new THREE.Mesh(projectileGeo, projectileMat);
+
+            const startPos = new THREE.Vector3(
+                (Math.random() - 0.5) * 20,
+                (Math.random() - 0.5) * 10,
+                camera.position.z + 5 + Math.random() * 5
+            );
+            projectile.position.copy(startPos);
+            
+            const targetPos = new THREE.Vector3().random().subScalar(0.5).multiply(modelBoundingBox.getSize(new THREE.Vector3())).add(modelBoundingBox.getCenter(new THREE.Vector3()));
+            projectile.userData.velocity = targetPos.clone().sub(startPos).normalize().multiplyScalar(speed);
+            
+            projectiles.add(projectile);
+        }
+
+        // --- Helper: Perlin Noise for organic healing front ---
+        // Simplex/Perlin noise for organic effect (use a simple hash-based noise for now)
+        function simpleNoise(x) {
+            return Math.sin(x * 12.9898) * 43758.5453 % 1;
+        }
+
+        // --- MODIFIED: triggerImpact ---
+        function triggerImpact(impactPoint, impactVector) {
+            const force = Number(document.getElementById('projectile-force').value);
+            const radius = Number(document.getElementById('projectile-radius').value);
+            const debrisDensity = Number(document.getElementById('debris-density').value) / 100.0;
+
+            loadedModel.traverse(child => {
+                if (child.isMesh && child.geometry.attributes.position) {
+                    const alphaAttribute = child.geometry.attributes.alpha;
+                    const positionAttribute = child.geometry.attributes.position;
+                    const normalAttribute = child.geometry.attributes.normal;
+                    const vCount = positionAttribute.count;
+
+                    const debrisPositions = [];
+                    const healingVertexData = [];
+                    const debrisNormals = [];
+                    let maxRadius = 0;
+
+                    for (let i = 0; i < vCount; i++) {
+                        const pos = new THREE.Vector3().fromBufferAttribute(positionAttribute, i);
+                        const dist = pos.distanceTo(impactPoint);
+                        if (dist < radius) {
+                            if (Math.random() < debrisDensity) {
+                                // Fracture: displace vertex outward along normal with randomness
+                                const normal = new THREE.Vector3().fromBufferAttribute(normalAttribute, i);
+                                const origPos = pos.clone();
+                                const fractureStrength = 0.3 + Math.random() * 0.8;
+                                const displaced = pos.clone().add(normal.clone().multiplyScalar(fractureStrength * (1 - dist / radius)));
+                                // Add some random direction for more organic look
+                                displaced.x += (Math.random() - 0.5) * 0.15;
+                                displaced.y += (Math.random() - 0.5) * 0.15;
+                                displaced.z += (Math.random() - 0.5) * 0.15;
+                                positionAttribute.setXYZ(i, displaced.x, displaced.y, displaced.z);
+                                alphaAttribute.setX(i, 0);
+                                debrisPositions.push(pos.x, pos.y, pos.z);
+                                debrisNormals.push(normal.x, normal.y, normal.z);
+                                healingVertexData.push({
+                                    index: i,
+                                    distance: dist,
+                                    orig: origPos,
+                                    fractured: displaced
+                                });
+                                if (dist > maxRadius) maxRadius = dist;
+                            }
+                        }
+                    }
+
+                    if (debrisPositions.length > 0) {
+                        alphaAttribute.needsUpdate = true;
+                        positionAttribute.needsUpdate = true;
+
+                        // Create multiple debris particle systems with different colors
+                        const debrisColors = [0xff4444, 0x884444, 0x444444, 0x666666];
+                        const debrisSizes = [0.03, 0.05, 0.07, 0.04];
+                        
+                        for (let colorIndex = 0; colorIndex < debrisColors.length; colorIndex++) {
+                            const debrisGeometry = new THREE.BufferGeometry();
+                            const colorPositions = [];
+                            const colorNormals = [];
+                            
+                            // Distribute particles across different color groups
+                            for (let i = colorIndex; i < debrisPositions.length; i += debrisColors.length) {
+                                colorPositions.push(debrisPositions[i], debrisPositions[i+1], debrisPositions[i+2]);
+                                colorNormals.push(debrisNormals[i], debrisNormals[i+1], debrisNormals[i+2]);
+                            }
+                            
+                            if (colorPositions.length > 0) {
+                                debrisGeometry.setAttribute('position', new THREE.Float32BufferAttribute(colorPositions, 3));
+                                const debrisMaterial = new THREE.PointsMaterial({ 
+                                    color: debrisColors[colorIndex], 
+                                    size: debrisSizes[colorIndex], 
+                                    transparent: true,
+                                    opacity: 0.8
+                                });
+                                const debris = new THREE.Points(debrisGeometry, debrisMaterial);
+                                debris.userData.velocities = [];
+                                for (let i = 0; i < colorPositions.length / 3; i++) {
+                                    const normal = new THREE.Vector3(colorNormals[i*3], colorNormals[i*3+1], colorNormals[i*3+2]);
+                                    
+                                    // Calculate impact direction (projectile velocity)
+                                    const impactDir = impactVector.clone().normalize();
+                                    
+                                    // Mix normal direction with impact direction for more realistic debris flow
+                                    const debrisDir = new THREE.Vector3()
+                                        .addVectors(
+                                            normal.clone().multiplyScalar(0.3), // Some normal direction
+                                            impactDir.clone().multiplyScalar(0.7) // Mostly impact direction
+                                        )
+                                        .normalize();
+                                    
+                                    // Add some randomness to the direction
+                                    debrisDir.x += (Math.random() - 0.5) * 0.4;
+                                    debrisDir.y += (Math.random() - 0.5) * 0.4;
+                                    debrisDir.z += (Math.random() - 0.5) * 0.4;
+                                    debrisDir.normalize();
+                                    
+                                    // Calculate velocity based on impact force and distance from impact point
+                                    const velocity = debrisDir.multiplyScalar(force * (Math.random() * 1.2 + 0.8));
+                                    debris.userData.velocities.push(velocity);
+                                }
+                                debris.userData.life = 2.0 + Math.random() * 0.5;
+                                debrisParticles.add(debris);
+                            }
+                        }
+
+                        healingZones.push({
+                            mesh: child,
+                            vertexData: healingVertexData,
+                            center: impactPoint,
+                            maxRadius: maxRadius,
+                            healProgress: 0,
+                            startHealingTime: performance.now() + 500 
+                        });
+                    }
+                }
+            });
+        }
+
+        function updateProjectilesAndHealing() {
+            const now = performance.now();
+            const healSpeed = Number(document.getElementById('projectile-heal').value);
+            const raycaster = new THREE.Raycaster();
+
+            // Update projectiles and trails
+            for (let i = projectiles.children.length - 1; i >= 0; i--) {
+                const p = projectiles.children[i];
+                p.position.add(p.userData.velocity);
+
+                const trailGeo = new THREE.SphereGeometry(0.05, 4, 4);
+                const trailMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true });
+                const trailPart = new THREE.Mesh(trailGeo, trailMat);
+                trailPart.position.copy(p.position);
+                trailPart.userData.life = 0.5;
+                trails.add(trailPart);
+
+                if (p.position.length() > 30) {
+                    projectiles.remove(p);
+                    continue;
+                }
+
+                if (loadedModel) {
+                    raycaster.set(p.position, p.userData.velocity.clone().normalize());
+                    const intersects = raycaster.intersectObject(loadedModel, true);
+
+                    if (intersects.length > 0 && intersects[0].distance < 1.0) {
+                        triggerImpact(intersects[0].point, p.userData.velocity);
+                        projectiles.remove(p);
+                    }
+                }
+            }
+            
+            // Update trails
+            for (let i = trails.children.length - 1; i >= 0; i--) {
+                const t = trails.children[i];
+                t.userData.life -= 1/60;
+                t.material.opacity = THREE.MathUtils.clamp(t.userData.life * 2, 0, 1);
+                if (t.userData.life <= 0) {
+                    trails.remove(t);
+                    t.geometry.dispose();
+                    t.material.dispose();
+                }
+            }
+
+            // Update debris
+            for (let i = debrisParticles.children.length - 1; i >= 0; i--) {
+                const debris = debrisParticles.children[i];
+                debris.userData.life -= 1/60;
+                
+                const positions = debris.geometry.attributes.position;
+                for (let j = 0; j < positions.count; j++) {
+                    const velocity = debris.userData.velocities[j];
+                    
+                    // Update position with velocity
+                    positions.setXYZ(j, 
+                        positions.getX(j) + velocity.x * 0.02, 
+                        positions.getY(j) + velocity.y * 0.02, 
+                        positions.getZ(j) + velocity.z * 0.02
+                    );
+                    
+                    // Apply air resistance (slow down over time)
+                    velocity.multiplyScalar(0.92);
+                    
+                    // Add gravity effect
+                    velocity.y -= 0.002;
+                    
+                    // Add some turbulence for more realistic movement
+                    velocity.x += (Math.random() - 0.5) * 0.001;
+                    velocity.z += (Math.random() - 0.5) * 0.001;
+                }
+                positions.needsUpdate = true;
+                
+                // Progressive fade out - start fading earlier for smoother dissolution
+                const lifeRatio = debris.userData.life / 2.5;
+                const fadeStart = 0.8; // Start fading at 80% life
+                let opacity = 0.8;
+                
+                if (lifeRatio < fadeStart) {
+                    opacity = THREE.MathUtils.smoothstep(0, fadeStart, lifeRatio) * 0.8;
+                }
+                
+                debris.material.opacity = THREE.MathUtils.clamp(opacity, 0, 0.8);
+                
+                // Shrink particles as they fade
+                debris.material.size = THREE.MathUtils.lerp(0.01, debris.material.size, lifeRatio);
+                
+                if (debris.userData.life <= 0) {
+                    debrisParticles.remove(debris);
+                    debris.geometry.dispose();
+                    debris.material.dispose();
+                }
+            }
+
+            // Update healing zones
+            for (let i = healingZones.length - 1; i >= 0; i--) {
+                const zone = healingZones[i];
+                if (now > zone.startHealingTime) {
+                    zone.healProgress += healSpeed * 0.15;
+                    const alphaAttribute = zone.mesh.geometry.attributes.alpha;
+                    const positionAttribute = zone.mesh.geometry.attributes.position;
+                    
+                    // Improved healing front calculation
+                    const healRadius = zone.maxRadius * Math.min(zone.healProgress, 1.0);
+                    const falloff = zone.maxRadius * 0.3;
+
+                    for (let j = 0; j < zone.vertexData.length; j++) {
+                        const data = zone.vertexData[j];
+                        const dist = data.distance;
+                        
+                        // Better organic healing front with smoother noise
+                        const noise = simpleNoise(dist * 2 + now * 0.0003) * 0.3;
+                        const healFront = healRadius + noise;
+                        
+                        // Calculate healing factor (0 to 1)
+                        let healFactor = 0;
+                        if (dist <= healFront - falloff) {
+                            healFactor = 1.0; // Fully healed
+                        } else if (dist <= healFront) {
+                            healFactor = THREE.MathUtils.smoothstep(healFront, healFront - falloff, dist);
+                        }
+                        
+                        // Ensure healFactor is clamped between 0 and 1
+                        healFactor = THREE.MathUtils.clamp(healFactor, 0, 1);
+                        
+                        // Set alpha
+                        alphaAttribute.setX(data.index, healFactor);
+                        
+                        // Interpolate position from fractured to original
+                        positionAttribute.setXYZ(
+                            data.index,
+                            THREE.MathUtils.lerp(data.fractured.x, data.orig.x, healFactor),
+                            THREE.MathUtils.lerp(data.fractured.y, data.orig.y, healFactor),
+                            THREE.MathUtils.lerp(data.fractured.z, data.orig.z, healFactor)
+                        );
+                    }
+                    
+                    alphaAttribute.needsUpdate = true;
+                    positionAttribute.needsUpdate = true;
+
+                    // Remove healing zone when fully healed
+                    if (zone.healProgress >= 1.2) {
+                        // Ensure all vertices are fully restored
+                        for (let j = 0; j < zone.vertexData.length; j++) {
+                            const data = zone.vertexData[j];
+                            alphaAttribute.setX(data.index, 1.0);
+                            positionAttribute.setXYZ(
+                                data.index,
+                                data.orig.x,
+                                data.orig.y,
+                                data.orig.z
+                            );
+                        }
+                        alphaAttribute.needsUpdate = true;
+                        positionAttribute.needsUpdate = true;
+                        healingZones.splice(i, 1);
+                    }
+                }
+            }
+        }
+
+        function updateModelVertices() {
+            loadedModel.traverse((child) => {
+                if (child.isMesh && originalVertices.has(child.uuid)) {
+                    const geom = child.geometry;
+                    const posAttr = geom.attributes.position;
+                    const origData = originalVertices.get(child.uuid);
+                    const origPos = origData.positions;
+                    const normals = origData.normals;
+                    const vCount = posAttr.count;
+                    
+                    const maxWaveFreq = Number(document.getElementById('wave-frequency').value);
+                    const maxAmp = Number(document.getElementById('wave-amplitude').value);
+                    const glitchIntensity = Number(document.getElementById('glitch-intensity').value);
+
+                    // Get detailed frequency data for regional reaction
+                    let freqData = null;
+                    if (analyser && dataArray) {
+                        freqData = new Uint8Array(analyser.frequencyBinCount);
+                        analyser.getByteFrequencyData(freqData);
+                    }
+
+                    // Calculate model bounds for regional mapping
+                    const modelBounds = new THREE.Box3().setFromObject(child);
+                    const modelSize = modelBounds.getSize(new THREE.Vector3());
+                    const modelCenter = modelBounds.getCenter(new THREE.Vector3());
+
+                    for (let i = 0; i < vCount; i++) {
+                        const ox = origPos[i * 3], oy = origPos[i * 3 + 1], oz = origPos[i * 3 + 2];
+                        const nx = normals[i * 3], ny = normals[i * 3 + 1], nz = normals[i * 3 + 2];
+                        
+                        // Calculate regional position (0-1) relative to model bounds
+                        const regionalX = (ox - modelCenter.x + modelSize.x/2) / modelSize.x;
+                        const regionalY = (oy - modelCenter.y + modelSize.y/2) / modelSize.y;
+                        const regionalZ = (oz - modelCenter.z + modelSize.z/2) / modelSize.z;
+                        
+                        // Create unique regional frequency mapping
+                        let regionalBass = 0, regionalMid = 0, regionalTreble = 0, regionalSub = 0;
+                        
+                        if (freqData) {
+                            // Map different regions to different frequency ranges
+                            const regionHash = Math.abs(regionalX * 100 + regionalY * 200 + regionalZ * 300);
+                            
+                            // Sub-bass (very low frequencies) - affects bottom regions
+                            const subIndex = Math.floor((regionalY * 0.3 + regionalZ * 0.7) * 8);
+                            regionalSub = freqData[subIndex] / 255.0;
+                            
+                            // Bass - affects different regions based on X position
+                            const bassIndex = Math.floor((regionalX * 0.4 + regionalY * 0.6) * 12) + 8;
+                            regionalBass = freqData[bassIndex] / 255.0;
+                            
+                            // Mid - affects center regions more
+                            const midIndex = Math.floor((regionalX * 0.5 + regionalY * 0.3 + regionalZ * 0.2) * 20) + 20;
+                            regionalMid = freqData[midIndex] / 255.0;
+                            
+                            // Treble - affects outer regions and details
+                            const trebleIndex = Math.floor((regionalX * 0.6 + regionalY * 0.2 + regionalZ * 0.2) * 30) + 40;
+                            regionalTreble = freqData[trebleIndex] / 255.0;
+                            
+                            // Add regional variation based on position
+                            const regionalVariation = simpleNoise(regionalX * 10 + regionalY * 15 + regionalZ * 20) * 0.3;
+                            regionalBass *= (1 + regionalVariation);
+                            regionalMid *= (1 + regionalVariation * 0.5);
+                            regionalTreble *= (1 + regionalVariation * 0.8);
+                        } else {
+                            // Fallback with regional variation
+                            regionalSub = smoothedBass * (0.5 + regionalY * 0.5);
+                            regionalBass = smoothedBass * (0.7 + regionalX * 0.3);
+                            regionalMid = smoothedMids * (0.6 + regionalZ * 0.4);
+                            regionalTreble = smoothedTreble * (0.8 + regionalX * 0.2);
+                        }
+                        
+                        // Create organic wave patterns with regional variation
+                        const timeScale = time * 0.5; // Slower time for more organic movement
+                        
+                        // Sub-bass waves (deep, slow movement)
+                        const subWave1 = Math.sin(oy * (0.2 + regionalSub * 1.5) + timeScale * 0.3);
+                        const subWave2 = Math.cos(ox * (0.15 + regionalSub * 1.2) + timeScale * 0.4);
+                        
+                        // Bass waves (stronger, more directional)
+                        const bassWave1 = Math.sin(ox * (0.4 + regionalBass * 2.5) + timeScale * 0.8);
+                        const bassWave2 = Math.cos(oy * (0.3 + regionalBass * 2.0) + timeScale * 1.1);
+                        const bassWave3 = Math.sin(oz * (0.35 + regionalBass * 2.2) + timeScale * 0.9);
+                        
+                        // Mid waves (complex patterns)
+                        const midWave1 = Math.sin(ox * (0.8 + regionalMid * 3.5) + timeScale * 1.5);
+                        const midWave2 = Math.cos(oy * (0.6 + regionalMid * 3.0) + timeScale * 1.8);
+                        const midWave3 = Math.sin(oz * (0.7 + regionalMid * 3.2) + timeScale * 1.2);
+                        const midWave4 = Math.cos(ox * (0.9 + regionalMid * 2.8) + timeScale * 1.6);
+                        
+                        // Treble waves (detailed, fast movement)
+                        const trebleWave1 = Math.sin(ox * (1.5 + regionalTreble * 4.5) + timeScale * 2.5);
+                        const trebleWave2 = Math.cos(oy * (1.2 + regionalTreble * 4.0) + timeScale * 2.8);
+                        const trebleWave3 = Math.sin(oz * (1.3 + regionalTreble * 4.2) + timeScale * 2.2);
+                        
+                        // Combine waves with regional weighting
+                        const subDisplacement = (subWave1 + subWave2) * regionalSub * 0.5;
+                        const bassDisplacement = (bassWave1 + bassWave2 + bassWave3) * regionalBass * 0.33;
+                        const midDisplacement = (midWave1 + midWave2 + midWave3 + midWave4) * regionalMid * 0.25;
+                        const trebleDisplacement = (trebleWave1 + trebleWave2 + trebleWave3) * regionalTreble * 0.33;
+                        
+                        // Add organic noise with regional variation
+                        const noiseScale = 0.15;
+                        const noise1 = simpleNoise(ox * 3 + timeScale * 0.3) * noiseScale * regionalBass;
+                        const noise2 = simpleNoise(oy * 3 + timeScale * 0.5) * noiseScale * regionalMid;
+                        const noise3 = simpleNoise(oz * 3 + timeScale * 0.4) * noiseScale * regionalTreble;
+                        
+                        // Create regional intensity variations
+                        const regionalIntensity = simpleNoise(regionalX * 5 + regionalY * 7 + regionalZ * 11) * 0.4 + 0.6;
+                        
+                        // Calculate total displacement with regional scaling
+                        const totalDisplacement = (
+                            subDisplacement * 0.8 + 
+                            bassDisplacement * 1.2 + 
+                            midDisplacement * 1.0 + 
+                            trebleDisplacement * 0.8 + 
+                            noise1 + noise2 + noise3
+                        ) * maxAmp * regionalIntensity;
+                        
+                        // Remove uniform pulsing - replace with regional breathing
+                        const regionalBreathing = simpleNoise(regionalX * 2 + regionalY * 3 + timeScale * 0.2) * 0.1;
+                        const breathingEffect = regionalBreathing * (regionalBass + regionalMid) * 0.3;
+                        
+                        // Glitch effect with regional variation
+                        let gx = 0, gy = 0, gz = 0;
+                        if (glitchAmount > 0.01) {
+                            const glitchNoise = simpleNoise(i + timeScale * 8);
+                            const regionalGlitch = simpleNoise(regionalX * 10 + regionalY * 15 + regionalZ * 20);
+                            gx = (glitchNoise - 0.5) * glitchIntensity * glitchAmount * regionalGlitch;
+                            gy = simpleNoise(i + 100 + timeScale * 8) * glitchIntensity * glitchAmount * regionalGlitch;
+                            gz = simpleNoise(i + 200 + timeScale * 8) * glitchIntensity * glitchAmount * regionalGlitch;
+                        }
+                        
+                        // Apply displacement with regional variation
+                        const finalDisplacement = totalDisplacement + breathingEffect;
+                        posAttr.setXYZ(i, 
+                            ox + nx * finalDisplacement + gx, 
+                            oy + ny * finalDisplacement + gy, 
+                            oz + nz * finalDisplacement + gz
+                        );
+                    }
+                    posAttr.needsUpdate = true;
+                }
+            });
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- Start Everything ---
+        init();
+    </script>
+</body>
+</html>
