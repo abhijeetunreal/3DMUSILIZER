@@ -257,27 +257,6 @@
             <button id="audio-loop" style="width: 100%; padding: 6px; margin-top: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer;">Loop: Off</button>
         </div>
         <div class="control-group">
-            <h3>Camera Control</h3>
-            <div id="camera-status" style="text-align: center; font-size: 0.8em; color: #00ff00; margin-bottom: 10px;">Auto Mode Active</div>
-            <label for="camera-mode"><span>Mode</span>
-                <select id="camera-mode" style="width: 100%; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px;">
-                    <option value="auto" selected>Auto (Audio Reactive)</option>
-                    <option value="manual">Manual Control</option>
-                    <option value="orbit">Orbit Mode</option>
-                    <option value="static">Static Position</option>
-                </select>
-            </label>
-            <label for="camera-sensitivity">Audio Sensitivity</label>
-            <input type="range" id="camera-sensitivity" min="0" max="2" step="0.1" value="1.0" style="width: 100%;">
-            <label for="camera-speed">Movement Speed</label>
-            <input type="range" id="camera-speed" min="0.1" max="3" step="0.1" value="1.0" style="width: 100%;">
-            <label for="camera-distance">Distance</label>
-            <input type="range" id="camera-distance" min="3" max="15" step="0.5" value="8" style="width: 100%;">
-            <div style="margin-top: 10px;">
-                <button id="reset-camera" style="width: 100%; padding: 6px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer;">Reset Camera</button>
-            </div>
-        </div>
-        <div class="control-group">
             <h3>Video Recording</h3>
             <button id="record-button" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer;">Start Recording</button>
             <div id="recording-status" style="text-align: center; font-size: 0.9em; color: #888; margin-bottom: 10px;"></div>
@@ -343,15 +322,6 @@
         let recordedChunks = [];
         let isRecording = false;
         let recordingStartTime = 0;
-        
-        // Camera control variables
-        let cameraMode = 'auto';
-        let cameraSensitivity = 1.0;
-        let cameraSpeed = 1.0;
-        let cameraDistance = 8;
-        let cameraTarget = new THREE.Vector3(0, 1, 0);
-        let cameraAutoRotation = 0;
-        let cameraAutoHeight = 0;
 
         const dropZone = document.getElementById('drop-zone');
         const dropZoneText = dropZone.querySelector('p');
@@ -380,22 +350,6 @@
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
             controls.target.set(0, 1, 0);
-            controls.enablePan = true;
-            controls.enableZoom = true;
-            controls.enableRotate = true;
-            controls.enabled = false; // Start with auto mode disabled
-            
-            // Better touch support
-            controls.touches = {
-                ONE: THREE.TOUCH.ROTATE,
-                TWO: THREE.TOUCH.DOLLY_PAN
-            };
-            
-            // Set reasonable limits
-            controls.minDistance = 2;
-            controls.maxDistance = 20;
-            controls.minPolarAngle = 0;
-            controls.maxPolarAngle = Math.PI;
 
             // Lighting Setup
             ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
@@ -500,12 +454,6 @@
             
             // Audio controls
             setupAudioControls();
-            
-            // Camera controls
-            setupCameraControls();
-            
-            // Initialize camera mode
-            updateCameraMode();
         }
         
         function setupVideoRecording() {
@@ -764,117 +712,6 @@
             // Set initial volume
             audioElement.volume = 0.7;
         }
-        
-        function setupCameraControls() {
-            const cameraModeSelect = document.getElementById('camera-mode');
-            const cameraSensitivitySlider = document.getElementById('camera-sensitivity');
-            const cameraSpeedSlider = document.getElementById('camera-speed');
-            const cameraDistanceSlider = document.getElementById('camera-distance');
-            const resetCameraButton = document.getElementById('reset-camera');
-            
-            // Camera mode control
-            cameraModeSelect.addEventListener('change', (e) => {
-                cameraMode = e.target.value;
-                updateCameraMode();
-            });
-            
-            // Camera sensitivity control
-            cameraSensitivitySlider.addEventListener('input', (e) => {
-                cameraSensitivity = parseFloat(e.target.value);
-            });
-            
-            // Camera speed control
-            cameraSpeedSlider.addEventListener('input', (e) => {
-                cameraSpeed = parseFloat(e.target.value);
-            });
-            
-            // Camera distance control
-            cameraDistanceSlider.addEventListener('input', (e) => {
-                cameraDistance = parseFloat(e.target.value);
-                updateCameraPosition();
-            });
-            
-            // Reset camera button
-            resetCameraButton.addEventListener('click', () => {
-                resetCamera();
-            });
-        }
-        
-        function updateCameraMode() {
-            console.log('Updating camera mode to:', cameraMode); // Debug log
-            
-            const cameraStatus = document.getElementById('camera-status');
-            
-            switch(cameraMode) {
-                case 'auto':
-                    controls.enabled = false;
-                    controls.autoRotate = false;
-                    cameraStatus.textContent = 'Auto Mode Active (Mouse/Touch Disabled)';
-                    cameraStatus.style.color = '#00ff00';
-                    console.log('Auto mode: controls disabled');
-                    break;
-                case 'manual':
-                    controls.enabled = true;
-                    controls.autoRotate = false;
-                    controls.enablePan = true;
-                    controls.enableZoom = true;
-                    controls.enableRotate = true;
-                    cameraStatus.textContent = 'Manual Mode Active (Mouse/Touch Enabled)';
-                    cameraStatus.style.color = '#ffff00';
-                    console.log('Manual mode: controls enabled');
-                    
-                    // Reset camera to a good starting position for manual control
-                    setTimeout(() => {
-                        camera.position.set(0, 2, cameraDistance);
-                        controls.target.set(0, 1, 0);
-                        controls.update();
-                    }, 100);
-                    break;
-                case 'orbit':
-                    controls.enabled = true;
-                    controls.autoRotate = true;
-                    controls.autoRotateSpeed = 1.0;
-                    controls.enablePan = true;
-                    controls.enableZoom = true;
-                    controls.enableRotate = true;
-                    cameraStatus.textContent = 'Orbit Mode Active (Mouse/Touch Enabled)';
-                    cameraStatus.style.color = '#ffff00';
-                    console.log('Orbit mode: controls enabled with auto-rotate');
-                    
-                    // Reset camera to a good starting position for orbit control
-                    setTimeout(() => {
-                        camera.position.set(0, 2, cameraDistance);
-                        controls.target.set(0, 1, 0);
-                        controls.update();
-                    }, 100);
-                    break;
-                case 'static':
-                    controls.enabled = false;
-                    controls.autoRotate = false;
-                    resetCamera();
-                    cameraStatus.textContent = 'Static Mode Active (Mouse/Touch Disabled)';
-                    cameraStatus.style.color = '#ff4444';
-                    console.log('Static mode: controls disabled');
-                    break;
-            }
-            
-            // Force controls update
-            controls.update();
-        }
-        
-        function updateCameraPosition() {
-            if (cameraMode === 'static') {
-                camera.position.set(0, 2, cameraDistance);
-                camera.lookAt(cameraTarget);
-            }
-        }
-        
-        function resetCamera() {
-            camera.position.set(0, 2, cameraDistance);
-            camera.lookAt(cameraTarget);
-            controls.target.copy(cameraTarget);
-            controls.update();
-        }
 
         function handleFiles(files) {
             for (const file of files) {
@@ -993,31 +830,10 @@
                 atmosphericParticles.rotation.y += 0.0005;
             }
 
-            // Camera movement based on mode
-            if (cameraMode === 'auto') {
-                // Audio-reactive camera movement
-                const audioIntensity = (smoothedBass + smoothedMids + smoothedTreble) / 3;
-                const baseRotation = time * 0.1 * cameraSpeed;
-                const audioRotation = audioIntensity * cameraSensitivity * 0.5;
-                const heightVariation = Math.sin(time * 0.3) * audioIntensity * cameraSensitivity * 2;
-                
-                camera.position.x = Math.sin(baseRotation + audioRotation) * cameraDistance;
-                camera.position.z = Math.cos(baseRotation + audioRotation) * cameraDistance;
-                camera.position.y = 2 + heightVariation;
-                camera.lookAt(cameraTarget);
-                
-                // Update controls target to follow the camera
-                controls.target.copy(cameraTarget);
-            } else if (cameraMode === 'static') {
-                // Static camera position
-                camera.position.set(0, 2, cameraDistance);
-                camera.lookAt(cameraTarget);
-                controls.target.copy(cameraTarget);
-            } else if (cameraMode === 'manual' || cameraMode === 'orbit') {
-                // In manual/orbit modes, let OrbitControls handle everything
-                // Don't interfere with user input - controls will update camera position
-                // Just ensure controls are updated
-                controls.update();
+            if (!controls.autoRotate) {
+                camera.position.x = Math.sin(time * 0.1) * 8;
+                camera.position.z = Math.cos(time * 0.1) * 8;
+                camera.lookAt(0,1,0);
             }
 
 
