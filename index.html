@@ -917,66 +917,6 @@
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { Reflector } from 'three/addons/objects/Reflector.js';
 
-        // --- Optimization: Cache frequently used DOM elements ---
-        const domCache = {
-            bassIntensity: null,
-            trebleIntensity: null,
-            volumetricIntensity: null,
-            volumetricToggle: null,
-            sunlightToggle: null,
-            sunlightIntensity: null,
-            laserOpacity: null,
-            bloomStrength: null,
-            bloomThreshold: null,
-            musicWavesToggle: null,
-            musicWavesCount: null,
-            musicWavesSpeed: null,
-            musicWavesTrailLength: null,
-            musicWavesGlow: null,
-            musicWavesColor: null,
-            glitchIntensity: null,
-            glitchThreshold: null,
-            waveFrequency: null,
-            waveAmplitude: null,
-            projectileToggle: null,
-            projectileSpeed: null,
-            projectileForce: null,
-            projectileRadius: null,
-            debrisDensity: null,
-            projectileHeal: null,
-            projectileHealColor: null,
-        };
-        function cacheDom() {
-            domCache.bassIntensity = document.getElementById('bass-intensity');
-            domCache.trebleIntensity = document.getElementById('treble-intensity');
-            domCache.volumetricIntensity = document.getElementById('volumetric-intensity');
-            domCache.volumetricToggle = document.getElementById('volumetric-toggle');
-            domCache.sunlightToggle = document.getElementById('sunlight-toggle');
-            domCache.sunlightIntensity = document.getElementById('sunlight-intensity');
-            domCache.laserOpacity = document.getElementById('laser-opacity');
-            domCache.bloomStrength = document.getElementById('bloom-strength');
-            domCache.bloomThreshold = document.getElementById('bloom-threshold');
-            domCache.musicWavesToggle = document.getElementById('music-waves-toggle');
-            domCache.musicWavesCount = document.getElementById('music-waves-count');
-            domCache.musicWavesSpeed = document.getElementById('music-waves-speed');
-            domCache.musicWavesTrailLength = document.getElementById('music-waves-trail-length');
-            domCache.musicWavesGlow = document.getElementById('music-waves-glow');
-            domCache.musicWavesColor = document.getElementById('music-waves-color');
-            domCache.glitchIntensity = document.getElementById('glitch-intensity');
-            domCache.glitchThreshold = document.getElementById('glitch-threshold');
-            domCache.waveFrequency = document.getElementById('wave-frequency');
-            domCache.waveAmplitude = document.getElementById('wave-amplitude');
-            domCache.projectileToggle = document.getElementById('projectile-toggle');
-            domCache.projectileSpeed = document.getElementById('projectile-speed');
-            domCache.projectileForce = document.getElementById('projectile-force');
-            domCache.projectileRadius = document.getElementById('projectile-radius');
-            domCache.debrisDensity = document.getElementById('debris-density');
-            domCache.projectileHeal = document.getElementById('projectile-heal');
-            domCache.projectileHealColor = document.getElementById('projectile-heal-color');
-        }
-        // Call cacheDom after DOM is ready
-        window.addEventListener('DOMContentLoaded', cacheDom);
-
         let scene, camera, renderer, controls, composer, bloomPass;
         let analyser, dataArray;
         let audioContext = null;
@@ -1021,9 +961,8 @@
         // Camera angle panel variables
         let cameraAnglePanelOpen = false;
         let cameraRenderers = {};
+        let cameraScenes = {};
         let cameraCameras = {};
-        let cameraComposers = {};
-        let cameraBloomPasses = {};
         let isDragging = false;
         let isResizing = false;
         let draggedElement = null;
@@ -2066,11 +2005,7 @@
             glitchAmount *= 0.9; 
             updateProjectilesAndHealing();
             updateMusicWaves();
-            
-            // Update camera views with throttling to prevent performance issues
-            if (cameraAnglePanelOpen && time % 0.2 < 0.016) { // Update every ~30fps but only when panel is open
-                updateCameraViews();
-            }
+            updateCameraViews();
             
             // Update code viewer with current function execution
             updateCodeViewer('animate', { time: time.toFixed(2) });
@@ -2170,16 +2105,16 @@
             updateCodeViewer('updateLights');
             
             ambientLight.intensity = smoothedMids * 0.5;
-            bassLight.intensity = smoothedBass * domCache.bassIntensity.value;
-            trebleLight.intensity = smoothedTreble * domCache.trebleIntensity.value;
+            bassLight.intensity = smoothedBass * document.getElementById('bass-intensity').value;
+            trebleLight.intensity = smoothedTreble * document.getElementById('treble-intensity').value;
             
-            const isVolumetricOn = domCache.volumetricToggle.checked;
-            volumetricLight.intensity = isVolumetricOn ? (smoothedMids * 0.5 + 0.4) * domCache.volumetricIntensity.value : 0;
+            const isVolumetricOn = document.getElementById('volumetric-toggle').checked;
+            volumetricLight.intensity = isVolumetricOn ? (smoothedMids * 0.5 + 0.4) * document.getElementById('volumetric-intensity').value : 0;
             
             // Update sunlight based on controls
-            const isSunlightOn = domCache.sunlightToggle.checked;
+            const isSunlightOn = document.getElementById('sunlight-toggle').checked;
             if (isSunlightOn) {
-                const baseIntensity = Number(domCache.sunlightIntensity.value) / 100;
+                const baseIntensity = Number(document.getElementById('sunlight-intensity').value) / 100;
                 // Add subtle audio reactivity to sunlight
                 const audioReactivity = (smoothedBass + smoothedMids) * 0.1;
                 sunlight.intensity = baseIntensity + audioReactivity;
@@ -2187,7 +2122,7 @@
                 sunlight.intensity = 0;
             }
             
-            const laserOpacity = domCache.laserOpacity.value;
+            const laserOpacity = document.getElementById('laser-opacity').value;
             laser1.material.opacity = smoothedBass * laserOpacity;
             laser1.material.color.setHSL(time % 1, 1, 0.5);
             laser1.rotation.z = time * 0.2;
@@ -2199,7 +2134,7 @@
         function fireProjectile() {
             if (modelBoundingBox.isEmpty()) return;
 
-            const speed = Number(domCache.projectileSpeed.value);
+            const speed = Number(document.getElementById('projectile-speed').value);
             const projectileGeo = new THREE.SphereGeometry(0.1, 8, 8);
             const projectileMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
             const projectile = new THREE.Mesh(projectileGeo, projectileMat);
@@ -2225,9 +2160,9 @@
 
         // --- MODIFIED: triggerImpact ---
         function triggerImpact(impactPoint, impactVector) {
-            const force = Number(domCache.projectileForce.value);
-            const radius = Number(domCache.projectileRadius.value);
-            const debrisDensity = Number(domCache.debrisDensity.value) / 100.0;
+            const force = Number(document.getElementById('projectile-force').value);
+            const radius = Number(document.getElementById('projectile-radius').value);
+            const debrisDensity = Number(document.getElementById('debris-density').value) / 100.0;
 
             loadedModel.traverse(child => {
                 if (child.isMesh && child.geometry.attributes.position) {
@@ -2345,7 +2280,7 @@
         
         function updateProjectilesAndHealing() {
             const now = performance.now();
-            const healSpeed = Number(domCache.projectileHeal.value);
+            const healSpeed = Number(document.getElementById('projectile-heal').value);
             const raycaster = new THREE.Raycaster();
             
             // Update code viewer
@@ -2520,9 +2455,9 @@
                     const normals = origData.normals;
                     const vCount = posAttr.count;
                     
-                    const maxWaveFreq = Number(domCache.waveFrequency.value);
-                    const maxAmp = Number(domCache.waveAmplitude.value);
-                    const glitchIntensity = Number(domCache.glitchIntensity.value);
+                    const maxWaveFreq = Number(document.getElementById('wave-frequency').value);
+                    const maxAmp = Number(document.getElementById('wave-amplitude').value);
+                    const glitchIntensity = Number(document.getElementById('glitch-intensity').value);
 
                     // Get detailed frequency data for regional reaction
                     let freqData = null;
@@ -2670,7 +2605,7 @@
         function createMusicWave() {
             if (!loadedModel) return;
             
-            const waveCount = Number(domCache.musicWavesCount.value);
+            const waveCount = Number(document.getElementById('music-waves-count').value);
             const currentWaves = musicWavesGroup.children.length;
             
             if (currentWaves >= waveCount) return;
@@ -2679,8 +2614,8 @@
             const modelSize = modelBoundingBox.getSize(new THREE.Vector3());
             const radius = Math.max(modelSize.x, modelSize.y, modelSize.z) * 1.2;
             
-            const trailLength = Number(domCache.musicWavesTrailLength.value);
-            const waveColor = new THREE.Color(domCache.musicWavesColor.value);
+            const trailLength = Number(document.getElementById('music-waves-trail-length').value);
+            const waveColor = new THREE.Color(document.getElementById('music-waves-color').value);
             
             // Create wave group
             const waveGroup = new THREE.Group();
@@ -2752,7 +2687,7 @@
                 head: head,
                 interactionPoints: interactionPoints,
                 trailLength: trailLength,
-                speed: Number(domCache.musicWavesSpeed.value),
+                speed: Number(document.getElementById('music-waves-speed').value),
                 angle: angle,
                 radius: radius,
                 modelCenter: modelCenter.clone(),
@@ -2770,7 +2705,7 @@
         }
         
         function updateMusicWaves() {
-            const isEnabled = domCache.musicWavesToggle.checked;
+            const isEnabled = document.getElementById('music-waves-toggle').checked;
             if (!isEnabled) {
                 musicWavesGroup.clear();
                 return;
@@ -2868,8 +2803,8 @@
                 });
                 
                 // Update trail colors with enhanced surface crawling effect
-                const waveColor = new THREE.Color(domCache.musicWavesColor.value);
-                const glowIntensity = Number(domCache.musicWavesGlow.value);
+                const waveColor = new THREE.Color(document.getElementById('music-waves-color').value);
+                const glowIntensity = Number(document.getElementById('music-waves-glow').value);
                 
                 for (let i = 0; i < trailLength; i++) {
                     const progress = i / trailLength;
@@ -2918,26 +2853,10 @@
                 panel.classList.toggle('open', cameraAnglePanelOpen);
                 
                 if (cameraAnglePanelOpen) {
-                    // Initialize camera views if not already done
-                    if (Object.keys(cameraRenderers).length === 0) {
-                        initializeCameraViews();
-                    }
+                    initializeCameraViews();
                     setupViewDragging();
-                    // Force an immediate update of camera views
-                    setTimeout(() => {
-                        updateCameraViews(true); // force update
-                    }, 100);
-                } else {
-                    // Clean up camera views when panel is closed
-                    cleanupCameraViews();
                 }
             });
-        }
-        
-        function cleanupCameraViews() {
-            // No need to clean up scenes since we're sharing the main scene
-            // Just ensure the panel is properly closed
-            cameraAnglePanelOpen = false;
         }
         
         // Code View Panel Functions
@@ -2990,10 +2909,9 @@
         
 
         
-        // --- Optimization: Throttle code viewer updates ---
-        let codeViewerThrottle = 0;
         function updateCodeViewer(functionName, details = '') {
             if (!codeViewPanelOpen) return;
+            
             const now = Date.now();
             if (now - lastUpdateTime < 100) return; // Throttle updates
             lastUpdateTime = now;
@@ -3157,14 +3075,15 @@
                     
                     const renderer = new THREE.WebGLRenderer({ 
                         canvas: canvas, 
-                        antialias: false, // Disable antialiasing for performance
+                        antialias: true,
                         alpha: true 
                     });
                     renderer.setSize(rect.width, rect.height);
                     renderer.setClearColor(0x000000, 0.8);
-                    renderer.shadowMap.enabled = false; // Disable shadows for performance
                     
                     const camera = new THREE.PerspectiveCamera(60, rect.width / rect.height, 0.1, 1000);
+                    const scene = new THREE.Scene();
+                    scene.background = new THREE.Color(0x000000);
                     
                     // Position cameras based on view type
                     switch(viewType) {
@@ -3182,26 +3101,52 @@
                             break;
                     }
                     
-                    // Use direct renderer instead of expensive post-processing
                     cameraRenderers[viewType] = renderer;
                     cameraCameras[viewType] = camera;
+                    cameraScenes[viewType] = scene;
                 }
             });
         }
         
-        // --- Optimization: Throttle camera view updates to 10 FPS and use direct rendering ---
-        let lastCameraViewUpdate = 0;
-        function updateCameraViews(force = false) {
+        function updateCameraViews() {
             if (!cameraAnglePanelOpen) return;
-            const now = performance.now();
-            if (!force && now - lastCameraViewUpdate < 100) return; // ~10 FPS
-            lastCameraViewUpdate = now;
+            
             const viewTypes = ['top', 'front', 'perspective'];
+            
             viewTypes.forEach(viewType => {
                 const renderer = cameraRenderers[viewType];
                 const camera = cameraCameras[viewType];
-                if (renderer && camera) {
-                    // Use direct rendering instead of composer (much faster)
+                const scene = cameraScenes[viewType];
+                
+                if (renderer && camera && scene) {
+                    // Clear scene
+                    scene.clear();
+                    
+                    // Clone main scene elements
+                    if (loadedModel) {
+                        const modelClone = loadedModel.clone();
+                        scene.add(modelClone);
+                    }
+                    
+                    // Add lights
+                    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+                    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+                    directionalLight.position.set(10, 10, 5);
+                    scene.add(ambientLight, directionalLight);
+                    
+                    // Add music waves if enabled
+                    if (document.getElementById('music-waves-toggle').checked && musicWavesGroup.children.length > 0) {
+                        const wavesClone = musicWavesGroup.clone();
+                        scene.add(wavesClone);
+                    }
+                    
+                    // Add other scene elements
+                    if (atmosphericParticles) {
+                        const particlesClone = atmosphericParticles.clone();
+                        scene.add(particlesClone);
+                    }
+                    
+                    // Render the view
                     renderer.render(scene, camera);
                 }
             });
