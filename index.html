@@ -227,7 +227,8 @@
         .control-group:nth-child(8) h3::before { content: "⚡"; }
         .control-group:nth-child(9) h3::before { content: "💥"; }
         .control-group:nth-child(10) h3::before { content: "🎮"; }
-        .control-group:nth-child(11) h3::before { content: "📹"; }
+        .control-group:nth-child(11) h3::before { content: "⌨️"; }
+        .control-group:nth-child(12) h3::before { content: "📹"; }
         
         .control-group label {
             display: flex;
@@ -431,6 +432,21 @@
             </div>
         </div>
         <div class="control-group">
+            <h3>Keyboard Shortcuts</h3>
+            <div style="font-size: 0.8em; color: #ccc; line-height: 1.4; margin-bottom: 10px;">
+                <div style="margin-bottom: 5px;"><strong>Space</strong> - Play/Pause Audio</div>
+                <div style="margin-bottom: 5px;"><strong>R</strong> - Start/Stop Recording</div>
+                <div style="margin-bottom: 5px;"><strong>M</strong> - Next Model</div>
+                <div style="margin-bottom: 5px;"><strong>N</strong> - Next Audio Track</div>
+                <div style="margin-bottom: 5px;"><strong>H</strong> - Toggle Menu</div>
+                <div style="margin-bottom: 5px;"><strong>F</strong> - Fullscreen</div>
+                <div style="margin-bottom: 5px;"><strong>Esc</strong> - Exit Fullscreen</div>
+                <div style="margin-bottom: 5px;"><strong>1-4</strong> - Camera Modes</div>
+                <div style="margin-bottom: 5px;"><strong>↑↓</strong> - Volume Up/Down</div>
+                <div style="margin-bottom: 5px;"><strong>←→</strong> - Seek -10s/+10s</div>
+            </div>
+        </div>
+        <div class="control-group">
             <h3>Video Recording</h3>
             <button id="record-button" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer;">Start Recording</button>
             <div id="recording-status" style="text-align: center; font-size: 0.9em; color: #888; margin-bottom: 10px;"></div>
@@ -516,6 +532,126 @@
         const dropZoneText = dropZone.querySelector('p');
         const audioElement = document.getElementById('audio');
 
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Don't trigger shortcuts when typing in input fields
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+                
+                switch(e.key.toLowerCase()) {
+                    case ' ':
+                        e.preventDefault();
+                        if (audioElement.paused) {
+                            audioElement.play();
+                        } else {
+                            audioElement.pause();
+                        }
+                        break;
+                        
+                    case 'r':
+                        e.preventDefault();
+                        if (isRecording) {
+                            stopRecording();
+                        } else {
+                            startRecording();
+                        }
+                        break;
+                        
+                    case 'm':
+                        e.preventDefault();
+                        if (loadedModels.length > 1) {
+                            currentModelIndex = (currentModelIndex + 1) % loadedModels.length;
+                            if (loadedModels[currentModelIndex].loaded) {
+                                selectModel(currentModelIndex);
+                            }
+                        }
+                        break;
+                        
+                    case 'n':
+                        e.preventDefault();
+                        if (loadedAudioFiles.length > 1) {
+                            currentAudioIndex = (currentAudioIndex + 1) % loadedAudioFiles.length;
+                            selectAudio(currentAudioIndex);
+                        }
+                        break;
+                        
+                    case 'h':
+                        e.preventDefault();
+                        const menuToggle = document.getElementById('menu-toggle');
+                        const controlsPanel = document.getElementById('controls-panel');
+                        menuToggle.classList.toggle('open');
+                        controlsPanel.classList.toggle('open');
+                        break;
+                        
+                    case 'f':
+                        e.preventDefault();
+                        if (!document.fullscreenElement) {
+                            document.documentElement.requestFullscreen();
+                        }
+                        break;
+                        
+                    case 'escape':
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen();
+                        }
+                        break;
+                        
+                    case '1':
+                        e.preventDefault();
+                        document.getElementById('camera-mode').value = 'auto';
+                        cameraMode = 'auto';
+                        updateCameraMode();
+                        break;
+                        
+                    case '2':
+                        e.preventDefault();
+                        document.getElementById('camera-mode').value = 'manual';
+                        cameraMode = 'manual';
+                        updateCameraMode();
+                        break;
+                        
+                    case '3':
+                        e.preventDefault();
+                        document.getElementById('camera-mode').value = 'orbit';
+                        cameraMode = 'orbit';
+                        updateCameraMode();
+                        break;
+                        
+                    case '4':
+                        e.preventDefault();
+                        document.getElementById('camera-mode').value = 'static';
+                        cameraMode = 'static';
+                        updateCameraMode();
+                        break;
+                        
+                    case 'arrowup':
+                        e.preventDefault();
+                        const currentVolume = audioElement.volume;
+                        audioElement.volume = Math.min(1, currentVolume + 0.1);
+                        document.getElementById('audio-volume').value = audioElement.volume;
+                        break;
+                        
+                    case 'arrowdown':
+                        e.preventDefault();
+                        const currentVol = audioElement.volume;
+                        audioElement.volume = Math.max(0, currentVol - 0.1);
+                        document.getElementById('audio-volume').value = audioElement.volume;
+                        break;
+                        
+                    case 'arrowleft':
+                        e.preventDefault();
+                        audioElement.currentTime = Math.max(0, audioElement.currentTime - 10);
+                        break;
+                        
+                    case 'arrowright':
+                        e.preventDefault();
+                        audioElement.currentTime = Math.min(audioElement.duration, audioElement.currentTime + 10);
+                        break;
+                }
+            });
+        }
+        
         function setupFileUploads() {
             const modelUpload = document.getElementById('model-upload');
             const audioUpload = document.getElementById('audio-upload');
@@ -717,6 +853,9 @@
             
             // Initialize camera mode
             updateCameraMode();
+            
+            // Setup keyboard shortcuts
+            setupKeyboardShortcuts();
         }
         
         function setupVideoRecording() {
