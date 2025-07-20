@@ -58,60 +58,150 @@
             width: 300px;
         }
 
-        /* --- Hamburger Menu & Sidebar --- */
+        /* --- Simplified Hamburger Menu & Sidebar --- */
         #menu-toggle {
             position: absolute;
             top: 20px;
             left: 20px;
             z-index: 1001;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
             border: 1px solid #555;
             color: white;
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
             border-radius: 8px;
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             display: flex;
             flex-direction: column;
             justify-content: space-around;
+            transition: all 0.3s ease;
+        }
+        #menu-toggle:hover {
+            background: rgba(0,0,0,0.9);
+            border-color: #777;
         }
         #menu-toggle .bar {
             width: 100%;
-            height: 2px;
+            height: 3px;
             background: white;
             transition: all 0.3s ease-in-out;
+            border-radius: 2px;
         }
         #menu-toggle.open .bar1 {
-            transform: rotate(45deg) translate(5px, 6px);
+            transform: rotate(45deg) translate(6px, 7px);
         }
         #menu-toggle.open .bar2 {
             opacity: 0;
         }
         #menu-toggle.open .bar3 {
-            transform: rotate(-45deg) translate(5px, -6px);
+            transform: rotate(-45deg) translate(6px, -7px);
         }
 
         #controls-panel {
             position: absolute;
             top: 0;
-            left: -300px; /* Hidden by default */
-            width: 280px;
+            left: -350px; /* Hidden by default */
+            width: 330px;
             height: 100%;
-            background: rgba(20, 20, 20, 0.9);
+            background: rgba(15, 15, 15, 0.95);
             z-index: 1000;
-            padding: 70px 10px 10px 10px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            padding: 80px 15px 15px 15px;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.7);
             transition: left 0.3s ease-in-out;
-            overflow-y: auto; /* Enables scrolling */
-            box-sizing: border-box; 
+            overflow-y: auto;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
         }
         #controls-panel.open {
             left: 0;
         }
+        
+        /* File Management Section */
+        .file-section {
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+        }
+        .file-section h3 {
+            margin: 0 0 15px 0;
+            color: #0af;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .file-section h3::before {
+            content: "📁";
+            font-size: 1.2em;
+        }
+        .file-list {
+            max-height: 120px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            margin: 2px 0;
+            background: rgba(50, 50, 50, 0.5);
+            border-radius: 4px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .file-item:hover {
+            background: rgba(70, 70, 70, 0.7);
+        }
+        .file-item.active {
+            background: rgba(0, 170, 255, 0.3);
+            border: 1px solid #0af;
+        }
+        .file-item .file-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .file-item .file-remove {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 0.7em;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        .file-item .file-remove:hover {
+            background: #ff6666;
+        }
+        .file-upload-btn {
+            width: 100%;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+        .file-upload-btn:hover {
+            background: #444;
+            border-color: #666;
+        }
+        
         .control-group {
             margin-bottom: 20px;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #333;
             padding-bottom: 15px;
         }
         .control-group:last-child {
@@ -120,15 +210,35 @@
         .control-group h3 {
             margin-top: 0;
             color: #0af;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+        .control-group h3::before {
+            font-size: 1.1em;
+        }
+        .control-group:nth-child(2) h3::before { content: "🎵"; }
+        .control-group:nth-child(3) h3::before { content: "💡"; }
+        .control-group:nth-child(4) h3::before { content: "🔦"; }
+        .control-group:nth-child(5) h3::before { content: "☀️"; }
+        .control-group:nth-child(6) h3::before { content: "✨"; }
+        .control-group:nth-child(7) h3::before { content: "🌊"; }
+        .control-group:nth-child(8) h3::before { content: "⚡"; }
+        .control-group:nth-child(9) h3::before { content: "💥"; }
+        .control-group:nth-child(10) h3::before { content: "🎮"; }
+        .control-group:nth-child(11) h3::before { content: "📹"; }
+        
         .control-group label {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 5px;
+            font-size: 0.85em;
         }
         .control-group input[type="range"] {
             width: 100%;
+            margin-bottom: 8px;
         }
         .control-group input[type="color"] {
             width: 100%;
@@ -137,10 +247,25 @@
             padding: 0;
             background: none;
             cursor: pointer;
+            border-radius: 4px;
         }
         .control-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
+        }
+        .control-group select, .control-group button {
+            width: 100%;
+            padding: 6px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        .control-group select:hover, .control-group button:hover {
+            background: #444;
+            border-color: #666;
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -157,6 +282,24 @@
 
     <!-- Controls Sidebar -->
     <div id="controls-panel">
+        <!-- File Management Section -->
+        <div class="file-section">
+            <h3>3D Models</h3>
+            <div id="model-list" class="file-list">
+                <div class="file-item" style="color: #888; font-style: italic;">No models loaded</div>
+            </div>
+            <input type="file" id="model-upload" accept=".glb,.gltf" multiple style="display: none;">
+            <button class="file-upload-btn" onclick="document.getElementById('model-upload').click()">Add 3D Models</button>
+        </div>
+        
+        <div class="file-section">
+            <h3>Audio Files</h3>
+            <div id="audio-list" class="file-list">
+                <div class="file-item" style="color: #888; font-style: italic;">No audio files loaded</div>
+            </div>
+            <input type="file" id="audio-upload" accept=".mp3,.wav,.ogg" multiple style="display: none;">
+            <button class="file-upload-btn" onclick="document.getElementById('audio-upload').click()">Add Audio Files</button>
+        </div>
         <div class="control-group">
             <h3>Bass Light</h3>
             <label for="bass-intensity">Intensity</label>
@@ -182,6 +325,16 @@
             <input type="range" id="bloom-strength" min="0" max="3" step="0.1" value="1.2">
             <label for="bloom-threshold">Threshold</label>
             <input type="range" id="bloom-threshold" min="0" max="1" step="0.01" value="0.2">
+        </div>
+        <div class="control-group">
+            <h3>Sunlight</h3>
+            <label for="sunlight-toggle"><span>Enable</span><input type="checkbox" id="sunlight-toggle" checked></label>
+            <label for="sunlight-intensity">Intensity</label>
+            <input type="range" id="sunlight-intensity" min="0" max="1000" step="1" value="50">
+            <label for="sunlight-color">Color</label>
+            <input type="color" id="sunlight-color" value="#ffeedd">
+            <label for="sunlight-height">Height</label>
+            <input type="range" id="sunlight-height" min="0" max="20" step="0.5" value="10">
         </div>
         <div class="control-group">
             <h3>Volumetric Light</h3>
@@ -240,7 +393,7 @@
                 </div>
                 <div style="display: flex; gap: 5px; margin-top: 5px;">
                     <button id="seek-to-start" style="flex: 1; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 0.8em;">Start</button>
-                    <button id="seek-to-end" style="flex: 1; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 0.8em;">End</button>
+                    <button id="pause-audio" style="flex: 1; padding: 4px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 0.8em;">Pause</button>
                 </div>
             </div>
             <label for="audio-volume">Volume</label>
@@ -298,7 +451,7 @@
     </div>
 
     <div id="drop-zone">
-        <p>Drop a 3D Model (.glb) & an Audio File (.mp3)</p>
+        <p>Drop 3D Models (.glb/.gltf) & Audio Files (.mp3/.wav/.ogg)</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -326,8 +479,14 @@
         let originalVertices = new Map();
         let time = 0;
         let smoothedBass = 0, smoothedMids = 0, smoothedTreble = 0, smoothedHighMids = 0;
-        let ambientLight, bassLight, trebleLight, laser1, laser2, volumetricLight;
+        let ambientLight, bassLight, trebleLight, laser1, laser2, volumetricLight, sunlight;
         let glitchAmount = 0;
+        
+        // Multiple file management
+        let loadedModels = [];
+        let loadedAudioFiles = [];
+        let currentModelIndex = 0;
+        let currentAudioIndex = 0;
         
         let healingZones = [];
         let debrisParticles = new THREE.Group();
@@ -357,6 +516,23 @@
         const dropZoneText = dropZone.querySelector('p');
         const audioElement = document.getElementById('audio');
 
+        function setupFileUploads() {
+            const modelUpload = document.getElementById('model-upload');
+            const audioUpload = document.getElementById('audio-upload');
+            
+            modelUpload.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleModelFiles(e.target.files);
+                }
+            });
+            
+            audioUpload.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleAudioFiles(e.target.files);
+                }
+            });
+        }
+        
         function setupDragAndDrop() {
             dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
             dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
@@ -375,6 +551,8 @@
             camera.position.set(0, 2, 8);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.body.appendChild(renderer.domElement);
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
@@ -400,6 +578,21 @@
             // Lighting Setup
             ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
             scene.add(ambientLight);
+            
+            // Sunlight - directional light for overall illumination
+            sunlight = new THREE.DirectionalLight(0xffeedd, 0.5);
+            sunlight.position.set(10, 10, 5);
+            sunlight.castShadow = true;
+            sunlight.shadow.mapSize.width = 2048;
+            sunlight.shadow.mapSize.height = 2048;
+            sunlight.shadow.camera.near = 0.5;
+            sunlight.shadow.camera.far = 50;
+            sunlight.shadow.camera.left = -10;
+            sunlight.shadow.camera.right = 10;
+            sunlight.shadow.camera.top = 10;
+            sunlight.shadow.camera.bottom = -10;
+            scene.add(sunlight);
+            
             bassLight = new THREE.SpotLight(0xff0000, 0, 0, Math.PI / 4, 0.5, 2);
             trebleLight = new THREE.SpotLight(0x0000ff, 0, 0, Math.PI / 4, 0.5, 2);
             volumetricLight = new THREE.SpotLight(0xffffff, 0, 0, Math.PI / 3, 0.3, 2);
@@ -427,6 +620,7 @@
             });
             groundMirror.position.y = -2;
             groundMirror.rotateX(-Math.PI / 2);
+            groundMirror.receiveShadow = true;
             scene.add(groundMirror);
 
             // --- NEW: Atmospheric Particles ---
@@ -485,6 +679,20 @@
             document.getElementById('bloom-strength').addEventListener('input', (e) => bloomPass.strength = Number(e.target.value));
             document.getElementById('bloom-threshold').addEventListener('input', (e) => bloomPass.threshold = Number(e.target.value));
             
+            // Sunlight controls
+            document.getElementById('sunlight-color').addEventListener('input', (e) => sunlight.color.set(e.target.value));
+            document.getElementById('sunlight-intensity').addEventListener('input', (e) => {
+                const intensity = Number(e.target.value) / 100;
+                sunlight.intensity = intensity;
+            });
+            document.getElementById('sunlight-height').addEventListener('input', (e) => {
+                const height = Number(e.target.value);
+                sunlight.position.y = height;
+            });
+            document.getElementById('sunlight-toggle').addEventListener('change', (e) => {
+                sunlight.intensity = e.target.checked ? Number(document.getElementById('sunlight-intensity').value) / 100 : 0;
+            });
+            
             document.getElementById('projectile-heal-color').addEventListener('input', (e) => {
                 if (loadedModel) {
                     loadedModel.traverse(child => {
@@ -494,6 +702,9 @@
                     });
                 }
             });
+            
+            // File upload controls
+            setupFileUploads();
             
             // Video recording controls
             setupVideoRecording();
@@ -753,8 +964,12 @@
                 audioElement.currentTime = 0;
             });
             
-            document.getElementById('seek-to-end').addEventListener('click', () => {
-                audioElement.currentTime = audioElement.duration;
+            document.getElementById('pause-audio').addEventListener('click', () => {
+                if (audioElement.paused) {
+                    audioElement.play();
+                } else {
+                    audioElement.pause();
+                }
             });
             
             // Update time display periodically
@@ -877,97 +1092,83 @@
         }
 
         function handleFiles(files) {
+            const modelFiles = [];
+            const audioFiles = [];
+            
             for (const file of files) {
                 const fileName = file.name.toLowerCase();
-                if (fileName.endsWith('.glb') || fileName.endsWith('.gltf')) loadModel(file);
-                else if (fileName.endsWith('.mp3') || fileName.endsWith('.wav') || fileName.endsWith('.ogg')) loadAudio(file);
+                if (fileName.endsWith('.glb') || fileName.endsWith('.gltf')) {
+                    modelFiles.push(file);
+                } else if (fileName.endsWith('.mp3') || fileName.endsWith('.wav') || fileName.endsWith('.ogg')) {
+                    audioFiles.push(file);
+                }
+            }
+            
+            if (modelFiles.length > 0) handleModelFiles(modelFiles);
+            if (audioFiles.length > 0) handleAudioFiles(audioFiles);
+        }
+        
+        function handleModelFiles(files) {
+            for (const file of files) {
+                addModelFile(file);
+            }
+        }
+        
+        function handleAudioFiles(files) {
+            for (const file of files) {
+                addAudioFile(file);
             }
         }
 
-        function loadModel(file) {
+        function addModelFile(file) {
+            const modelData = {
+                file: file,
+                name: file.name,
+                url: URL.createObjectURL(file),
+                loaded: false,
+                scene: null
+            };
+            
+            loadedModels.push(modelData);
+            updateModelList();
+            
+            // Load the model
+            loadModelFromData(modelData);
+        }
+        
+        function addAudioFile(file) {
+            const audioData = {
+                file: file,
+                name: file.name,
+                url: URL.createObjectURL(file)
+            };
+            
+            loadedAudioFiles.push(audioData);
+            updateAudioList();
+            
+            // If this is the first audio file, load it automatically
+            if (loadedAudioFiles.length === 1) {
+                loadAudioFromData(audioData);
+            }
+        }
+        
+        function loadModelFromData(modelData) {
             const loader = new GLTFLoader();
-            const url = URL.createObjectURL(file);
-            loader.load(url, (gltf) => {
-                if (loadedModel) scene.remove(loadedModel);
-                loadedModel = gltf.scene;
+            loader.load(modelData.url, (gltf) => {
+                modelData.scene = gltf.scene;
+                modelData.loaded = true;
                 
-                const box = new THREE.Box3().setFromObject(loadedModel);
-                const center = box.getCenter(new THREE.Vector3());
-                const size = box.getSize(new THREE.Vector3());
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 5 / maxDim;
-                
-                loadedModel.scale.set(scale, scale, scale);
-                loadedModel.position.sub(center.multiplyScalar(scale));
-                
-                modelBoundingBox.setFromObject(loadedModel); 
-                
-                loadedModel.traverse((child) => {
-                    if (child.isMesh) {
-                        child.geometry.computeVertexNormals();
-                        const alphaArray = new Float32Array(child.geometry.attributes.position.count).fill(1.0);
-                        child.geometry.setAttribute('alpha', new THREE.BufferAttribute(alphaArray, 1));
-
-                        child.material.onBeforeCompile = shader => {
-                            shader.uniforms.healingColor = { value: new THREE.Color(document.getElementById('projectile-heal-color').value) };
-                            shader.vertexShader = 'attribute float alpha;\nvarying float vAlpha;\n' + shader.vertexShader;
-                            shader.vertexShader = shader.vertexShader.replace(
-                                '#include <begin_vertex>',
-                                '#include <begin_vertex>\nvAlpha = alpha;'
-                            );
-                            shader.fragmentShader = 'varying float vAlpha;\nuniform vec3 healingColor;\n' + shader.fragmentShader;
-                            shader.fragmentShader = shader.fragmentShader.replace(
-                                /}\s*$/,
-                                `   if (vAlpha < 1.0) {
-                                        if (vAlpha <= 0.0) discard;
-                                        gl_FragColor.a *= vAlpha;
-                                        // Only show healing glow when alpha is between 0.1 and 0.9 (healing front)
-                                        if (vAlpha > 0.1 && vAlpha < 0.9) {
-                                            float edge = smoothstep(0.1, 0.3, vAlpha) - smoothstep(0.7, 0.9, vAlpha);
-                                            gl_FragColor.rgb += healingColor * edge * 2.0;
-                                        }
-                                    }
-                                }`
-                            );
-                        };
-                        child.material.transparent = true;
-                        child.material.needsUpdate = true;
-
-                        originalVertices.set(child.uuid, {
-                            positions: child.geometry.attributes.position.array.slice(),
-                            normals: child.geometry.attributes.normal.array.slice()
-                        });
-                    }
-                });
-                scene.add(loadedModel);
-
-                const modelCenter = new THREE.Vector3();
-                box.getCenter(modelCenter);
-                const modelSize = box.getSize(new THREE.Vector3());
-
-                bassLight.position.set(modelCenter.x - modelSize.x * 1.5, modelCenter.y + modelSize.y, modelCenter.z);
-                bassLight.target.position.copy(modelCenter);
-                bassLight.distance = modelSize.x * 5;
-
-                trebleLight.position.set(modelCenter.x + modelSize.x * 1.5, modelCenter.y + modelSize.y, modelCenter.z);
-                trebleLight.target.position.copy(modelCenter);
-                trebleLight.distance = modelSize.x * 5;
-
-                volumetricLight.position.set(modelCenter.x, modelCenter.y + modelSize.y * 2, modelCenter.z + modelSize.z);
-                volumetricLight.target.position.copy(modelCenter);
-                volumetricLight.distance = modelSize.y * 5;
-
-                URL.revokeObjectURL(url);
-                updateDropZoneStatus();
+                // If this is the first model, load it automatically
+                if (loadedModels.length === 1) {
+                    loadModel(modelData);
+                }
             }, undefined, (error) => {
-                console.error('An error happened:', error);
-                if(dropZoneText) dropZoneText.textContent = 'Failed to load 3D model.';
+                console.error('Failed to load model:', modelData.name, error);
             });
         }
-
-        function loadAudio(file) {
-            const url = URL.createObjectURL(file);
-            audioElement.src = url;
+        
+        function loadAudioFromData(audioData) {
+            audioElement.src = audioData.url;
             audioElement.load();
             audioElement.play().catch(e => console.error("Autoplay blocked:", e));
             if (!analyser) setupAudioContext();
@@ -975,10 +1176,222 @@
             updateDropZoneStatus();
         }
         
+        function loadModel(modelData) {
+            if (loadedModel) scene.remove(loadedModel);
+            loadedModel = modelData.scene.clone();
+            
+            const box = new THREE.Box3().setFromObject(loadedModel);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 5 / maxDim;
+            
+            loadedModel.scale.set(scale, scale, scale);
+            loadedModel.position.sub(center.multiplyScalar(scale));
+            
+            modelBoundingBox.setFromObject(loadedModel); 
+            
+            loadedModel.traverse((child) => {
+                if (child.isMesh) {
+                    child.geometry.computeVertexNormals();
+                    const alphaArray = new Float32Array(child.geometry.attributes.position.count).fill(1.0);
+                    child.geometry.setAttribute('alpha', new THREE.BufferAttribute(alphaArray, 1));
+
+                    // Enable shadow casting and receiving
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+
+                    child.material.onBeforeCompile = shader => {
+                        shader.uniforms.healingColor = { value: new THREE.Color(document.getElementById('projectile-heal-color').value) };
+                        shader.vertexShader = 'attribute float alpha;\nvarying float vAlpha;\n' + shader.vertexShader;
+                        shader.vertexShader = shader.vertexShader.replace(
+                            '#include <begin_vertex>',
+                            '#include <begin_vertex>\nvAlpha = alpha;'
+                        );
+                        shader.fragmentShader = 'varying float vAlpha;\nuniform vec3 healingColor;\n' + shader.fragmentShader;
+                        shader.fragmentShader = shader.fragmentShader.replace(
+                            /}\s*$/,
+                            `   if (vAlpha < 1.0) {
+                                    if (vAlpha <= 0.0) discard;
+                                    gl_FragColor.a *= vAlpha;
+                                    // Only show healing glow when alpha is between 0.1 and 0.9 (healing front)
+                                    if (vAlpha > 0.1 && vAlpha < 0.9) {
+                                        float edge = smoothstep(0.1, 0.3, vAlpha) - smoothstep(0.7, 0.9, vAlpha);
+                                        gl_FragColor.rgb += healingColor * edge * 2.0;
+                                    }
+                                }
+                            }`
+                        );
+                    };
+                    child.material.transparent = true;
+                    child.material.needsUpdate = true;
+
+                    originalVertices.set(child.uuid, {
+                        positions: child.geometry.attributes.position.array.slice(),
+                        normals: child.geometry.attributes.normal.array.slice()
+                    });
+                }
+            });
+            scene.add(loadedModel);
+
+            const modelCenter = new THREE.Vector3();
+            box.getCenter(modelCenter);
+            const modelSize = box.getSize(new THREE.Vector3());
+
+            bassLight.position.set(modelCenter.x - modelSize.x * 1.5, modelCenter.y + modelSize.y, modelCenter.z);
+            bassLight.target.position.copy(modelCenter);
+            bassLight.distance = modelSize.x * 5;
+
+            trebleLight.position.set(modelCenter.x + modelSize.x * 1.5, modelCenter.y + modelSize.y, modelCenter.z);
+            trebleLight.target.position.copy(modelCenter);
+            trebleLight.distance = modelSize.x * 5;
+
+            volumetricLight.position.set(modelCenter.x, modelCenter.y + modelSize.y * 2, modelCenter.z + modelSize.z);
+            volumetricLight.target.position.copy(modelCenter);
+            volumetricLight.distance = modelSize.y * 5;
+
+            updateDropZoneStatus();
+        }
+
+        function loadAudio(audioData) {
+            audioElement.src = audioData.url;
+            audioElement.load();
+            audioElement.play().catch(e => console.error("Autoplay blocked:", e));
+            if (!analyser) setupAudioContext();
+            isAudioReady = true;
+            updateDropZoneStatus();
+        }
+        
+        function updateModelList() {
+            const modelList = document.getElementById('model-list');
+            modelList.innerHTML = '';
+            
+            if (loadedModels.length === 0) {
+                modelList.innerHTML = '<div class="file-item" style="color: #888; font-style: italic;">No models loaded</div>';
+                return;
+            }
+            
+            loadedModels.forEach((modelData, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                if (index === currentModelIndex && modelData.loaded) {
+                    fileItem.classList.add('active');
+                }
+                
+                fileItem.innerHTML = `
+                    <span class="file-name">${modelData.name}</span>
+                    <button class="file-remove" onclick="removeModel(${index})">×</button>
+                `;
+                
+                fileItem.addEventListener('click', () => {
+                    if (modelData.loaded) {
+                        selectModel(index);
+                    }
+                });
+                
+                modelList.appendChild(fileItem);
+            });
+        }
+        
+        function updateAudioList() {
+            const audioList = document.getElementById('audio-list');
+            audioList.innerHTML = '';
+            
+            if (loadedAudioFiles.length === 0) {
+                audioList.innerHTML = '<div class="file-item" style="color: #888; font-style: italic;">No audio files loaded</div>';
+                return;
+            }
+            
+            loadedAudioFiles.forEach((audioData, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                if (index === currentAudioIndex) {
+                    fileItem.classList.add('active');
+                }
+                
+                fileItem.innerHTML = `
+                    <span class="file-name">${audioData.name}</span>
+                    <button class="file-remove" onclick="removeAudio(${index})">×</button>
+                `;
+                
+                fileItem.addEventListener('click', () => {
+                    selectAudio(index);
+                });
+                
+                audioList.appendChild(fileItem);
+            });
+        }
+        
+        function selectModel(index) {
+            if (index >= 0 && index < loadedModels.length && loadedModels[index].loaded) {
+                currentModelIndex = index;
+                loadModel(loadedModels[index]);
+                updateModelList();
+            }
+        }
+        
+        function selectAudio(index) {
+            if (index >= 0 && index < loadedAudioFiles.length) {
+                currentAudioIndex = index;
+                loadAudio(loadedAudioFiles[index]);
+                updateAudioList();
+            }
+        }
+        
+        function removeModel(index) {
+            if (index >= 0 && index < loadedModels.length) {
+                const modelData = loadedModels[index];
+                URL.revokeObjectURL(modelData.url);
+                loadedModels.splice(index, 1);
+                
+                if (loadedModels.length === 0) {
+                    if (loadedModel) {
+                        scene.remove(loadedModel);
+                        loadedModel = null;
+                    }
+                    currentModelIndex = 0;
+                } else {
+                    currentModelIndex = Math.min(currentModelIndex, loadedModels.length - 1);
+                    if (loadedModels[currentModelIndex].loaded) {
+                        loadModel(loadedModels[currentModelIndex]);
+                    }
+                }
+                
+                updateModelList();
+                updateDropZoneStatus();
+            }
+        }
+        
+        function removeAudio(index) {
+            if (index >= 0 && index < loadedAudioFiles.length) {
+                const audioData = loadedAudioFiles[index];
+                URL.revokeObjectURL(audioData.url);
+                loadedAudioFiles.splice(index, 1);
+                
+                if (loadedAudioFiles.length === 0) {
+                    audioElement.src = '';
+                    isAudioReady = false;
+                    currentAudioIndex = 0;
+                } else {
+                    currentAudioIndex = Math.min(currentAudioIndex, loadedAudioFiles.length - 1);
+                    loadAudio(loadedAudioFiles[currentAudioIndex]);
+                }
+                
+                updateAudioList();
+                updateDropZoneStatus();
+            }
+        }
+        
         function updateDropZoneStatus() {
-            if (loadedModel && isAudioReady) dropZone.classList.add('hidden');
-            else if (loadedModel) dropZoneText.textContent = 'Drop an Audio File (.mp3)';
-            else if (isAudioReady) dropZoneText.textContent = 'Drop a 3D Model (.glb)';
+            if (loadedModels.length > 0 && loadedAudioFiles.length > 0) {
+                dropZone.classList.add('hidden');
+            } else if (loadedModels.length > 0) {
+                dropZoneText.textContent = 'Drop Audio Files (.mp3/.wav/.ogg)';
+            } else if (loadedAudioFiles.length > 0) {
+                dropZoneText.textContent = 'Drop 3D Models (.glb/.gltf)';
+            } else {
+                dropZoneText.textContent = 'Drop 3D Models (.glb/.gltf) & Audio Files (.mp3/.wav/.ogg)';
+            }
         }
 
         function animate() {
@@ -1079,6 +1492,17 @@
             
             const isVolumetricOn = document.getElementById('volumetric-toggle').checked;
             volumetricLight.intensity = isVolumetricOn ? (smoothedMids * 0.5 + 0.4) * document.getElementById('volumetric-intensity').value : 0;
+            
+            // Update sunlight based on controls
+            const isSunlightOn = document.getElementById('sunlight-toggle').checked;
+            if (isSunlightOn) {
+                const baseIntensity = Number(document.getElementById('sunlight-intensity').value) / 100;
+                // Add subtle audio reactivity to sunlight
+                const audioReactivity = (smoothedBass + smoothedMids) * 0.1;
+                sunlight.intensity = baseIntensity + audioReactivity;
+            } else {
+                sunlight.intensity = 0;
+            }
             
             const laserOpacity = document.getElementById('laser-opacity').value;
             laser1.material.opacity = smoothedBass * laserOpacity;
@@ -1547,6 +1971,10 @@
             composer.setSize(window.innerWidth, window.innerHeight);
         }
 
+        // Make functions globally available for onclick handlers
+        window.removeModel = removeModel;
+        window.removeAudio = removeAudio;
+        
         // --- Start Everything ---
         init();
     </script>
