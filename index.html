@@ -737,15 +737,15 @@
         <div class="control-group">
             <h3>Bloom Effect</h3>
             <label for="bloom-strength">Strength</label>
-            <input type="range" id="bloom-strength" min="0" max="3" step="0.1" value="1.2">
+            <input type="range" id="bloom-strength" min="0" max="3" step="0.1" value="3">
             <label for="bloom-threshold">Threshold</label>
-            <input type="range" id="bloom-threshold" min="0" max="1" step="0.01" value="0.2">
+            <input type="range" id="bloom-threshold" min="0" max="1" step="0.01" value="0.05">
         </div>
         <div class="control-group">
             <h3>Sunlight</h3>
             <label for="sunlight-toggle"><span>Enable</span><input type="checkbox" id="sunlight-toggle" checked></label>
             <label for="sunlight-intensity">Intensity</label>
-            <input type="range" id="sunlight-intensity" min="0" max="1000" step="1" value="50">
+            <input type="range" id="sunlight-intensity" min="0" max="1000" step="1" value="300">
             <label for="sunlight-color">Color</label>
             <input type="color" id="sunlight-color" value="#ffeedd">
             <label for="sunlight-height">Height</label>
@@ -755,21 +755,21 @@
             <h3>Volumetric Light</h3>
             <label for="volumetric-toggle"><span>Enable</span><input type="checkbox" id="volumetric-toggle" checked></label>
             <label for="volumetric-intensity">Intensity</label>
-            <input type="range" id="volumetric-intensity" min="0" max="50" step="0.1" value="15">
+            <input type="range" id="volumetric-intensity" min="0" max="100" step="0.1" value="20">
             <label for="volumetric-color">Color</label>
             <input type="color" id="volumetric-color" value="#ffffff">
         </div>
         <div class="control-group">
             <h3>Model Distortion</h3>
             <label for="wave-frequency">Max Wave Frequency</label>
-            <input type="range" id="wave-frequency" min="0" max="20" step="0.1" value="4.0">
+            <input type="range" id="wave-frequency" min="0" max="20" step="0.1" value="10">
             <label for="wave-amplitude">Amplitude</label>
-            <input type="range" id="wave-amplitude" min="0" max="2" step="0.05" value="1.0">
+            <input type="range" id="wave-amplitude" min="0" max="2" step="0.05" value="0.1">
         </div>
         <div class="control-group">
             <h3>Glitch Effect</h3>
             <label for="glitch-intensity">Intensity</label>
-            <input type="range" id="glitch-intensity" min="0" max="1" step="0.01" value="0.5">
+            <input type="range" id="glitch-intensity" min="0" max="1" step="0.01" value="0.05">
             <label for="glitch-threshold">Threshold</label>
             <input type="range" id="glitch-threshold" min="0" max="1" step="0.01" value="0.8">
         </div>
@@ -778,7 +778,7 @@
             <h3>Music Waves</h3>
             <label for="music-waves-toggle"><span>Enable</span><input type="checkbox" id="music-waves-toggle" checked></label>
             <label for="music-waves-count">Wave Count</label>
-            <input type="range" id="music-waves-count" min="1" max="20" step="1" value="3">
+            <input type="range" id="music-waves-count" min="1" max="20" step="1" value="10">
             <label for="music-waves-speed">Speed</label>
             <input type="range" id="music-waves-speed" min="0.1" max="100" step="0.1" value="0.8">
             <label for="music-waves-trail-length">Trail Length</label>
@@ -899,6 +899,12 @@
         <p>Drop 3D Models (.glb/.gltf) & Audio Files (.mp3/.wav/.ogg)</p>
     </div>
 
+    <div id="audio-init-prompt" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);color:#fff;font-size:2rem;flex-direction:column;transition:opacity 0.4s;">
+        <div style="margin-bottom:1.5rem;">Press <b>Space</b> or click <b>Play</b> below to start the music</div>
+        <div style="font-size:1rem;color:#aaa;"></div>
+        <button id="audio-init-play-btn" style="margin-top:2rem;padding:0.7em 2.5em;font-size:1.3rem;background:#00ffaa;color:#222;border:none;border-radius:8px;cursor:pointer;box-shadow:0 2px 12px #00ffaa55;transition:background 0.2s;">▶ Play</button>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script type="importmap">
         {
@@ -928,8 +934,22 @@
         let glitchAmount = 0;
         
         // Multiple file management
-        let loadedModels = [];
-        let loadedAudioFiles = [];
+        let loadedModels = [
+            {
+                file: null,
+                name: 'zombie_police.glb',
+                url: 'Assets/zombie_police.glb',
+                loaded: false,
+                scene: null
+            }
+        ];
+        let loadedAudioFiles = [
+            {
+                file: null,
+                name: 'melodic-techno-03-extended-version-moogify-9867.mp3',
+                url: 'Assets/melodic-techno-03-extended-version-moogify-9867.mp3'
+            }
+        ];
         let currentModelIndex = 0;
         let currentAudioIndex = 0;
         
@@ -1238,6 +1258,17 @@
             setupUIControls();
             setupDragAndDrop();
             animate();
+
+            // Load default model and audio if present
+            updateModelList();
+            updateAudioList();
+            // Try to load the default model and audio
+            if (loadedModels.length > 0) {
+                loadModelFromData(loadedModels[0]);
+            }
+            if (loadedAudioFiles.length > 0) {
+                loadAudioFromData(loadedAudioFiles[0]);
+            }
         }
 
         function setupAudioContext() {
@@ -3152,8 +3183,67 @@
             });
         }
         
+        function hideAudioInitPrompt() {
+            const prompt = document.getElementById('audio-init-prompt');
+            if (prompt) {
+                prompt.style.opacity = '0';
+                setTimeout(() => { prompt.style.display = 'none'; }, 400);
+            }
+        }
+        function showAudioInitPrompt() {
+            const prompt = document.getElementById('audio-init-prompt');
+            if (prompt) {
+                prompt.style.display = 'flex';
+                prompt.style.opacity = '1';
+            }
+        }
+
         // --- Start Everything ---
         init();
+        document.addEventListener('DOMContentLoaded', () => {
+            showAudioInitPrompt();
+            // Setup Play button in prompt
+            const playBtn = document.getElementById('audio-init-play-btn');
+            if (playBtn) {
+                playBtn.addEventListener('click', async () => {
+                    if (!analyser) setupAudioContext();
+                    if (audioContext && audioContext.state !== 'running') {
+                        await audioContext.resume();
+                    }
+                    if (audioElement.paused) {
+                        audioElement.play();
+                    }
+                });
+            }
+        });
+        audioElement.addEventListener('play', hideAudioInitPrompt);
+        audioElement.addEventListener('pause', () => {
+            if (audioElement.currentTime === 0 || audioElement.ended) {
+                showAudioInitPrompt();
+            }
+        });
+        // Also hide prompt on Space keydown if audio starts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' && audioElement.paused) {
+                setTimeout(() => {
+                    if (!audioElement.paused) hideAudioInitPrompt();
+                }, 100);
+            }
+        });
+        // Space key should start audio if prompt is visible
+        document.addEventListener('keydown', async (e) => {
+            const prompt = document.getElementById('audio-init-prompt');
+            if (e.key === ' ' && prompt && prompt.style.display !== 'none') {
+                e.preventDefault();
+                if (!analyser) setupAudioContext();
+                if (audioContext && audioContext.state !== 'running') {
+                    await audioContext.resume();
+                }
+                if (audioElement.paused) {
+                    audioElement.play();
+                }
+            }
+        });
     </script>
 </body>
 </html>
