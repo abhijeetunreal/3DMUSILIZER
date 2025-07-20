@@ -77,6 +77,146 @@
             justify-content: space-around;
             transition: all 0.3s ease;
         }
+        
+        /* Camera Angle Panel */
+        #camera-angle-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(0, 0, 0, 0);
+            border: none;
+            color: #fff;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        #camera-angle-toggle:hover {
+            background: rgba(0,0,0,0.8);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        #camera-angle-toggle.active {
+            background: rgba(0, 170, 255, 0.3);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 170, 255, 0.3);
+        }
+        
+
+        
+        #camera-angle-panel {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            width: 400px;
+            height: 500px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: none;
+            box-shadow: none;
+            overflow: visible;
+            min-width: 300px;
+            min-height: 300px;
+        }
+        #camera-angle-panel.open {
+            display: block;
+        }
+        
+        #camera-angle-panel::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(-45deg, transparent 30%, #555 30%, #555 40%, transparent 40%);
+            cursor: se-resize;
+        }
+        
+        .camera-view {
+            position: absolute;
+            width: 180px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            border-radius: 6px;
+            overflow: hidden;
+            min-width: 120px;
+            min-height: 80px;
+            z-index: 1001;
+        }
+        
+        .camera-view:nth-child(1) {
+            top: 10px;
+            right: 10px;
+        }
+        
+        .camera-view:nth-child(2) {
+            top: 140px;
+            right: 10px;
+        }
+        
+        .camera-view:nth-child(3) {
+            top: 270px;
+            right: 10px;
+        }
+        
+        .camera-view canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .camera-view-label {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            color: #fff;
+            font-size: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 3px;
+            pointer-events: none;
+            z-index: 1002;
+        }
+        
+        .camera-view-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            cursor: move;
+            z-index: 1002;
+        }
+        
+        .camera-view-resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(-45deg, transparent 30%, #555 30%, #555 40%, transparent 40%);
+            cursor: se-resize;
+            z-index: 1002;
+        }
+        
+
+        
+
         #menu-toggle:hover {
             background: rgba(0,0,0,0.9);
             border-color: #777;
@@ -225,10 +365,11 @@
         .control-group:nth-child(6) h3::before { content: "✨"; }
         .control-group:nth-child(7) h3::before { content: "🌊"; }
         .control-group:nth-child(8) h3::before { content: "⚡"; }
-        .control-group:nth-child(9) h3::before { content: "💥"; }
-        .control-group:nth-child(10) h3::before { content: "🎮"; }
-        .control-group:nth-child(11) h3::before { content: "⌨️"; }
-        .control-group:nth-child(12) h3::before { content: "📹"; }
+        .control-group:nth-child(9) h3::before { content: "🌊"; }
+        .control-group:nth-child(10) h3::before { content: "💥"; }
+        .control-group:nth-child(11) h3::before { content: "🎮"; }
+        .control-group:nth-child(12) h3::before { content: "⌨️"; }
+        .control-group:nth-child(13) h3::before { content: "📹"; }
         
         .control-group label {
             display: flex;
@@ -268,6 +409,237 @@
             background: #444;
             border-color: #666;
         }
+
+        /* Code View Panel */
+        #code-view-toggle {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(0,0,0,0.7);
+            border: none;
+            color: #fff;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        #code-view-toggle:hover {
+            background: rgba(0,0,0,0.8);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        #code-view-toggle.active {
+            background: rgba(0, 255, 170, 0.3);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 255, 170, 0.3);
+        }
+        
+        #code-view-panel {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            width: 450px;
+            height: 400px;
+            background: rgba(15, 15, 15, 0.3);
+            border: 1px solid rgba(0, 255, 170, 0.3);
+            border-radius: 12px;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 255, 170, 0.1);
+            overflow: hidden;
+            min-width: 300px;
+            min-height: 200px;
+            animation: codePanelGlow 3s ease-in-out infinite alternate;
+        }
+        
+        #code-view-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 255, 170, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 255, 170, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(0, 255, 170, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes codePanelGlow {
+            0% {
+                box-shadow: 0 8px 32px rgba(0, 255, 170, 0.1);
+                border-color: rgba(0, 255, 170, 0.3);
+            }
+            100% {
+                box-shadow: 0 8px 32px rgba(0, 255, 170, 0.2);
+                border-color: rgba(0, 255, 170, 0.5);
+            }
+        }
+        
+        @keyframes codeLineAppear {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes livePulse {
+            0%, 100% {
+                opacity: 0.7;
+                color: #00ffaa;
+            }
+            50% {
+                opacity: 1;
+                color: #00ffff;
+            }
+        }
+        
+        .live-indicator {
+            animation: livePulse 2s ease-in-out infinite;
+        }
+        #code-view-panel.open {
+            display: block;
+        }
+        
+        #code-view-panel::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(-45deg, transparent 30%, #555 30%, #555 40%, transparent 40%);
+            cursor: se-resize;
+        }
+        
+        .code-view-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 35px;
+            background: linear-gradient(90deg, rgba(0, 255, 170, 0.2), rgba(0, 255, 170, 0.1));
+            cursor: move;
+            z-index: 1002;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 13px;
+            color: #00ffaa;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(0, 255, 170, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .code-view-content {
+            position: absolute;
+            top: 35px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(30, 30, 30, 0.2);
+            overflow: hidden;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #d4d4d4;
+            z-index: 1001;
+            backdrop-filter: blur(5px);
+        }
+        
+        .code-view-line {
+            margin: 3px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            padding: 3px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .code-view-line::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: rgba(0, 255, 170, 0.3);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .code-view-line.active {
+            background: linear-gradient(90deg, rgba(0, 255, 170, 0.15), rgba(0, 255, 170, 0.05));
+            color: #00ffaa;
+            border-left: 3px solid #00ffaa;
+            padding-left: 12px;
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0, 255, 170, 0.1);
+        }
+        
+        .code-view-line.active::before {
+            transform: scaleY(1);
+        }
+        
+        .code-view-line:hover {
+            background: rgba(0, 255, 170, 0.1);
+            transform: translateX(2px);
+        }
+        
+        .code-view-line.function {
+            color: #569cd6;
+            text-shadow: 0 0 5px rgba(86, 156, 214, 0.3);
+        }
+        
+        .code-view-line.comment {
+            color: #6a9955;
+            font-style: italic;
+        }
+        
+        .code-view-line.string {
+            color: #ce9178;
+            text-shadow: 0 0 3px rgba(206, 145, 120, 0.3);
+        }
+        
+        .code-view-line.number {
+            color: #b5cea8;
+            font-weight: bold;
+        }
+        
+        .code-view-line.keyword {
+            color: #c586c0;
+            text-shadow: 0 0 4px rgba(197, 134, 192, 0.3);
+        }
+        
+        .code-view-resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(-45deg, transparent 30%, #555 30%, #555 40%, transparent 40%);
+            cursor: se-resize;
+            z-index: 1002;
+        }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -279,6 +651,48 @@
         <div class="bar bar1"></div>
         <div class="bar bar2"></div>
         <div class="bar bar3"></div>
+    </div>
+
+    <!-- Camera Angle Toggle Button -->
+    <div id="camera-angle-toggle">📷</div>
+
+    <!-- Camera Angle Panel -->
+    <div id="camera-angle-panel">
+        <div class="camera-view" data-view="top">
+            <div class="camera-view-header"></div>
+            <canvas id="camera-top"></canvas>
+            <div class="camera-view-label">Top</div>
+            <div class="camera-view-resize-handle"></div>
+        </div>
+        <div class="camera-view" data-view="front">
+            <div class="camera-view-header"></div>
+            <canvas id="camera-front"></canvas>
+            <div class="camera-view-label">Front</div>
+            <div class="camera-view-resize-handle"></div>
+        </div>
+        <div class="camera-view" data-view="perspective">
+            <div class="camera-view-header"></div>
+            <canvas id="camera-perspective"></canvas>
+            <div class="camera-view-label">Perspective</div>
+            <div class="camera-view-resize-handle"></div>
+        </div>
+    </div>
+
+    <!-- Code View Toggle Button -->
+    <div id="code-view-toggle">💻</div>
+
+    <!-- Code View Panel -->
+    <div id="code-view-panel">
+        <div class="code-view-header">
+            <span style="margin-right: 8px;">💻</span>
+            Code Execution Monitor
+            <span class="live-indicator" style="margin-left: auto; font-size: 10px;">LIVE</span>
+        </div>
+        <div class="code-view-content" id="code-view-content">
+            <div class="code-view-line comment">// Audio-reactive visualizer code execution...</div>
+            <div class="code-view-line">Waiting for audio input...</div>
+        </div>
+        <div class="code-view-resize-handle"></div>
     </div>
 
     <!-- Controls Sidebar -->
@@ -358,6 +772,21 @@
             <input type="range" id="glitch-intensity" min="0" max="1" step="0.01" value="0.5">
             <label for="glitch-threshold">Threshold</label>
             <input type="range" id="glitch-threshold" min="0" max="1" step="0.01" value="0.8">
+        </div>
+
+        <div class="control-group">
+            <h3>Music Waves</h3>
+            <label for="music-waves-toggle"><span>Enable</span><input type="checkbox" id="music-waves-toggle" checked></label>
+            <label for="music-waves-count">Wave Count</label>
+            <input type="range" id="music-waves-count" min="1" max="20" step="1" value="3">
+            <label for="music-waves-speed">Speed</label>
+            <input type="range" id="music-waves-speed" min="0.1" max="100" step="0.1" value="0.8">
+            <label for="music-waves-trail-length">Trail Length</label>
+            <input type="range" id="music-waves-trail-length" min="20" max="300" step="5" value="40">
+            <label for="music-waves-glow">Glow Intensity</label>
+            <input type="range" id="music-waves-glow" min="0.1" max="100" step="0.1" value="1.5">
+            <label for="music-waves-color">Wave Color</label>
+            <input type="color" id="music-waves-color" value="#00ffff">
         </div>
         <div class="control-group">
             <h3>Projectile Impact</h3>
@@ -488,6 +917,66 @@
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { Reflector } from 'three/addons/objects/Reflector.js';
 
+        // --- Optimization: Cache frequently used DOM elements ---
+        const domCache = {
+            bassIntensity: null,
+            trebleIntensity: null,
+            volumetricIntensity: null,
+            volumetricToggle: null,
+            sunlightToggle: null,
+            sunlightIntensity: null,
+            laserOpacity: null,
+            bloomStrength: null,
+            bloomThreshold: null,
+            musicWavesToggle: null,
+            musicWavesCount: null,
+            musicWavesSpeed: null,
+            musicWavesTrailLength: null,
+            musicWavesGlow: null,
+            musicWavesColor: null,
+            glitchIntensity: null,
+            glitchThreshold: null,
+            waveFrequency: null,
+            waveAmplitude: null,
+            projectileToggle: null,
+            projectileSpeed: null,
+            projectileForce: null,
+            projectileRadius: null,
+            debrisDensity: null,
+            projectileHeal: null,
+            projectileHealColor: null,
+        };
+        function cacheDom() {
+            domCache.bassIntensity = document.getElementById('bass-intensity');
+            domCache.trebleIntensity = document.getElementById('treble-intensity');
+            domCache.volumetricIntensity = document.getElementById('volumetric-intensity');
+            domCache.volumetricToggle = document.getElementById('volumetric-toggle');
+            domCache.sunlightToggle = document.getElementById('sunlight-toggle');
+            domCache.sunlightIntensity = document.getElementById('sunlight-intensity');
+            domCache.laserOpacity = document.getElementById('laser-opacity');
+            domCache.bloomStrength = document.getElementById('bloom-strength');
+            domCache.bloomThreshold = document.getElementById('bloom-threshold');
+            domCache.musicWavesToggle = document.getElementById('music-waves-toggle');
+            domCache.musicWavesCount = document.getElementById('music-waves-count');
+            domCache.musicWavesSpeed = document.getElementById('music-waves-speed');
+            domCache.musicWavesTrailLength = document.getElementById('music-waves-trail-length');
+            domCache.musicWavesGlow = document.getElementById('music-waves-glow');
+            domCache.musicWavesColor = document.getElementById('music-waves-color');
+            domCache.glitchIntensity = document.getElementById('glitch-intensity');
+            domCache.glitchThreshold = document.getElementById('glitch-threshold');
+            domCache.waveFrequency = document.getElementById('wave-frequency');
+            domCache.waveAmplitude = document.getElementById('wave-amplitude');
+            domCache.projectileToggle = document.getElementById('projectile-toggle');
+            domCache.projectileSpeed = document.getElementById('projectile-speed');
+            domCache.projectileForce = document.getElementById('projectile-force');
+            domCache.projectileRadius = document.getElementById('projectile-radius');
+            domCache.debrisDensity = document.getElementById('debris-density');
+            domCache.projectileHeal = document.getElementById('projectile-heal');
+            domCache.projectileHealColor = document.getElementById('projectile-heal-color');
+        }
+        // Call cacheDom after DOM is ready
+        window.addEventListener('DOMContentLoaded', cacheDom);
+
         let scene, camera, renderer, controls, composer, bloomPass;
         let analyser, dataArray;
         let audioContext = null;
@@ -508,6 +997,7 @@
         let debrisParticles = new THREE.Group();
         let projectiles = new THREE.Group();
         let trails = new THREE.Group();
+        let musicWavesGroup = new THREE.Group();
         let atmosphericParticles;
         let lastProjectileTime = 0;
         let lastSmoothedBass = 0;
@@ -527,6 +1017,28 @@
         let cameraTarget = new THREE.Vector3(0, 1, 0);
         let cameraAutoRotation = 0;
         let cameraAutoHeight = 0;
+        
+        // Camera angle panel variables
+        let cameraAnglePanelOpen = false;
+        let cameraRenderers = {};
+        let cameraCameras = {};
+        let cameraComposers = {};
+        let cameraBloomPasses = {};
+        let isDragging = false;
+        let isResizing = false;
+        let draggedElement = null;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let elementStartX = 0;
+        let elementStartY = 0;
+        let elementStartWidth = 0;
+        let elementStartHeight = 0;
+        
+        // Code view panel variables
+        let codeViewPanelOpen = false;
+        let currentFunction = '';
+        let functionCallCount = 0;
+        let lastUpdateTime = 0;
 
         const dropZone = document.getElementById('drop-zone');
         const dropZoneText = dropZone.querySelector('p');
@@ -682,7 +1194,7 @@
         function init() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x000000);
-            scene.add(debrisParticles, projectiles, trails);
+            scene.add(debrisParticles, projectiles, trails, musicWavesGroup);
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, 2, 8);
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -839,6 +1351,17 @@
                 }
             });
             
+            // Music waves controls
+            document.getElementById('music-waves-toggle').addEventListener('change', (e) => {
+                if (!e.target.checked) {
+                    musicWavesGroup.clear();
+                }
+            });
+            
+
+            
+
+            
             // File upload controls
             setupFileUploads();
             
@@ -856,6 +1379,8 @@
             
             // Setup keyboard shortcuts
             setupKeyboardShortcuts();
+            setupCameraAnglePanel();
+            setupCodeViewPanel();
         }
         
         function setupVideoRecording() {
@@ -1540,6 +2065,15 @@
 
             glitchAmount *= 0.9; 
             updateProjectilesAndHealing();
+            updateMusicWaves();
+            
+            // Update camera views with throttling to prevent performance issues
+            if (cameraAnglePanelOpen && time % 0.2 < 0.016) { // Update every ~30fps but only when panel is open
+                updateCameraViews();
+            }
+            
+            // Update code viewer with current function execution
+            updateCodeViewer('animate', { time: time.toFixed(2) });
             
             if (atmosphericParticles) {
                 atmosphericParticles.rotation.y += 0.0005;
@@ -1615,6 +2149,13 @@
                 smoothedHighMids = THREE.MathUtils.lerp(smoothedHighMids, normalizedHighMids, 0.2);
                 smoothedTreble = THREE.MathUtils.lerp(smoothedTreble, trebleAvg / 255.0, 0.1);
                 
+                // Update code viewer with audio analysis
+                updateCodeViewer('analyzeAudio', { 
+                    bass: normalizedBass.toFixed(3), 
+                    mid: (midsAvg / 255.0).toFixed(3), 
+                    treble: (trebleAvg / 255.0).toFixed(3) 
+                });
+                
                 time += (0.002 + smoothedMids * 0.03);
 
                 if (loadedModel) updateModelVertices();
@@ -1625,17 +2166,20 @@
         }
 
         function updateLights() {
-            ambientLight.intensity = smoothedMids * 0.5;
-            bassLight.intensity = smoothedBass * document.getElementById('bass-intensity').value;
-            trebleLight.intensity = smoothedTreble * document.getElementById('treble-intensity').value;
+            // Update code viewer
+            updateCodeViewer('updateLights');
             
-            const isVolumetricOn = document.getElementById('volumetric-toggle').checked;
-            volumetricLight.intensity = isVolumetricOn ? (smoothedMids * 0.5 + 0.4) * document.getElementById('volumetric-intensity').value : 0;
+            ambientLight.intensity = smoothedMids * 0.5;
+            bassLight.intensity = smoothedBass * domCache.bassIntensity.value;
+            trebleLight.intensity = smoothedTreble * domCache.trebleIntensity.value;
+            
+            const isVolumetricOn = domCache.volumetricToggle.checked;
+            volumetricLight.intensity = isVolumetricOn ? (smoothedMids * 0.5 + 0.4) * domCache.volumetricIntensity.value : 0;
             
             // Update sunlight based on controls
-            const isSunlightOn = document.getElementById('sunlight-toggle').checked;
+            const isSunlightOn = domCache.sunlightToggle.checked;
             if (isSunlightOn) {
-                const baseIntensity = Number(document.getElementById('sunlight-intensity').value) / 100;
+                const baseIntensity = Number(domCache.sunlightIntensity.value) / 100;
                 // Add subtle audio reactivity to sunlight
                 const audioReactivity = (smoothedBass + smoothedMids) * 0.1;
                 sunlight.intensity = baseIntensity + audioReactivity;
@@ -1643,7 +2187,7 @@
                 sunlight.intensity = 0;
             }
             
-            const laserOpacity = document.getElementById('laser-opacity').value;
+            const laserOpacity = domCache.laserOpacity.value;
             laser1.material.opacity = smoothedBass * laserOpacity;
             laser1.material.color.setHSL(time % 1, 1, 0.5);
             laser1.rotation.z = time * 0.2;
@@ -1655,7 +2199,7 @@
         function fireProjectile() {
             if (modelBoundingBox.isEmpty()) return;
 
-            const speed = Number(document.getElementById('projectile-speed').value);
+            const speed = Number(domCache.projectileSpeed.value);
             const projectileGeo = new THREE.SphereGeometry(0.1, 8, 8);
             const projectileMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
             const projectile = new THREE.Mesh(projectileGeo, projectileMat);
@@ -1681,9 +2225,9 @@
 
         // --- MODIFIED: triggerImpact ---
         function triggerImpact(impactPoint, impactVector) {
-            const force = Number(document.getElementById('projectile-force').value);
-            const radius = Number(document.getElementById('projectile-radius').value);
-            const debrisDensity = Number(document.getElementById('debris-density').value) / 100.0;
+            const force = Number(domCache.projectileForce.value);
+            const radius = Number(domCache.projectileRadius.value);
+            const debrisDensity = Number(domCache.debrisDensity.value) / 100.0;
 
             loadedModel.traverse(child => {
                 if (child.isMesh && child.geometry.attributes.position) {
@@ -1797,10 +2341,15 @@
             });
         }
 
+
+        
         function updateProjectilesAndHealing() {
             const now = performance.now();
-            const healSpeed = Number(document.getElementById('projectile-heal').value);
+            const healSpeed = Number(domCache.projectileHeal.value);
             const raycaster = new THREE.Raycaster();
+            
+            // Update code viewer
+            updateCodeViewer('updateProjectilesAndHealing');
 
             // Update projectiles and trails
             for (let i = projectiles.children.length - 1; i >= 0; i--) {
@@ -1959,6 +2508,9 @@
         }
 
         function updateModelVertices() {
+            // Update code viewer
+            updateCodeViewer('updateModelVertices');
+            
             loadedModel.traverse((child) => {
                 if (child.isMesh && originalVertices.has(child.uuid)) {
                     const geom = child.geometry;
@@ -1968,9 +2520,9 @@
                     const normals = origData.normals;
                     const vCount = posAttr.count;
                     
-                    const maxWaveFreq = Number(document.getElementById('wave-frequency').value);
-                    const maxAmp = Number(document.getElementById('wave-amplitude').value);
-                    const glitchIntensity = Number(document.getElementById('glitch-intensity').value);
+                    const maxWaveFreq = Number(domCache.waveFrequency.value);
+                    const maxAmp = Number(domCache.waveAmplitude.value);
+                    const glitchIntensity = Number(domCache.glitchIntensity.value);
 
                     // Get detailed frequency data for regional reaction
                     let freqData = null;
@@ -2113,6 +2665,547 @@
         // Make functions globally available for onclick handlers
         window.removeModel = removeModel;
         window.removeAudio = removeAudio;
+        
+        // Music Waves Functions - SURFACE CRAWLING WAVES
+        function createMusicWave() {
+            if (!loadedModel) return;
+            
+            const waveCount = Number(domCache.musicWavesCount.value);
+            const currentWaves = musicWavesGroup.children.length;
+            
+            if (currentWaves >= waveCount) return;
+            
+            const modelCenter = modelBoundingBox.getCenter(new THREE.Vector3());
+            const modelSize = modelBoundingBox.getSize(new THREE.Vector3());
+            const radius = Math.max(modelSize.x, modelSize.y, modelSize.z) * 1.2;
+            
+            const trailLength = Number(domCache.musicWavesTrailLength.value);
+            const waveColor = new THREE.Color(domCache.musicWavesColor.value);
+            
+            // Create wave group
+            const waveGroup = new THREE.Group();
+            
+            // Create surface-crawling wave
+            const trailGeometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(trailLength * 3);
+            const colors = new Float32Array(trailLength * 3);
+            
+            const angle = (currentWaves / waveCount) * Math.PI * 2;
+            
+            // Initialize trail with surface pattern
+            for (let i = 0; i < trailLength; i++) {
+                const progress = i / trailLength;
+                const waveAngle = angle + progress * 0.6;
+                const waveRadius = radius * (0.8 + progress * 0.4);
+                const surfaceHeight = Math.sin(progress * Math.PI * 4) * 0.2;
+                
+                positions[i * 3] = modelCenter.x + Math.cos(waveAngle) * waveRadius;
+                positions[i * 3 + 1] = modelCenter.y + surfaceHeight;
+                positions[i * 3 + 2] = modelCenter.z + Math.sin(waveAngle) * waveRadius;
+                
+                const alpha = 1 - progress;
+                colors[i * 3] = waveColor.r * alpha;
+                colors[i * 3 + 1] = waveColor.g * alpha;
+                colors[i * 3 + 2] = waveColor.b * alpha;
+            }
+            
+            trailGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            trailGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const trailMaterial = new THREE.LineBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const trail = new THREE.Line(trailGeometry, trailMaterial);
+            waveGroup.add(trail);
+            
+            // Create enhanced glowing head
+            const headGeometry = new THREE.SphereGeometry(0.12, 16, 16);
+            const headMaterial = new THREE.MeshBasicMaterial({
+                color: waveColor,
+                transparent: true,
+                opacity: 1.0
+            });
+            
+            const head = new THREE.Mesh(headGeometry, headMaterial);
+            waveGroup.add(head);
+            
+            // Create surface interaction points
+            const interactionGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+            const interactionMaterial = new THREE.MeshBasicMaterial({
+                color: waveColor,
+                transparent: true,
+                opacity: 0.6
+            });
+            
+            const interactionPoints = [];
+            for (let i = 0; i < 5; i++) {
+                const point = new THREE.Mesh(interactionGeometry, interactionMaterial.clone());
+                waveGroup.add(point);
+                interactionPoints.push(point);
+            }
+            
+            waveGroup.userData = {
+                trail: trail,
+                head: head,
+                interactionPoints: interactionPoints,
+                trailLength: trailLength,
+                speed: Number(domCache.musicWavesSpeed.value),
+                angle: angle,
+                radius: radius,
+                modelCenter: modelCenter.clone(),
+                time: Math.random() * 15,
+                wavePhase: Math.random() * Math.PI * 2,
+                surfaceOffset: Math.random() * Math.PI * 2,
+                crawlDirection: new THREE.Vector3(
+                    Math.random() - 0.5,
+                    Math.random() - 0.5,
+                    Math.random() - 0.5
+                ).normalize()
+            };
+            
+            musicWavesGroup.add(waveGroup);
+        }
+        
+        function updateMusicWaves() {
+            const isEnabled = domCache.musicWavesToggle.checked;
+            if (!isEnabled) {
+                musicWavesGroup.clear();
+                return;
+            }
+            
+            // Update code viewer
+            updateCodeViewer('updateMusicWaves');
+            
+            createMusicWave();
+            
+            musicWavesGroup.children.forEach((waveGroup) => {
+                const userData = waveGroup.userData;
+                const trail = userData.trail;
+                const head = userData.head;
+                const interactionPoints = userData.interactionPoints;
+                const trailLength = userData.trailLength;
+                const speed = userData.speed;
+                const radius = userData.radius;
+                const modelCenter = userData.modelCenter;
+                
+                userData.time += 0.025 * speed;
+                userData.wavePhase += 0.1;
+                userData.surfaceOffset += 0.05;
+                
+                // Get audio frequency data for reactive waves
+                let bassIntensity = 0, midIntensity = 0, trebleIntensity = 0;
+                if (analyser && dataArray) {
+                    const freqCount = analyser.frequencyBinCount;
+                    const bassSlice = dataArray.slice(0, Math.floor(freqCount * 0.1));
+                    const midSlice = dataArray.slice(Math.floor(freqCount * 0.1), Math.floor(freqCount * 0.4));
+                    const trebleSlice = dataArray.slice(Math.floor(freqCount * 0.7), freqCount);
+                    
+                    bassIntensity = bassSlice.reduce((a, b) => a + b, 0) / (bassSlice.length || 1) / 255;
+                    midIntensity = midSlice.reduce((a, b) => a + b, 0) / (midSlice.length || 1) / 255;
+                    trebleIntensity = trebleSlice.reduce((a, b) => a + b, 0) / (trebleSlice.length || 1) / 255;
+                }
+                
+                const baseAngle = userData.angle + userData.time;
+                
+                // Get current trail positions and colors
+                const positions = trail.geometry.attributes.position.array;
+                const colors = trail.geometry.attributes.color.array;
+                
+                // Shift trail positions backward to create movement
+                for (let i = trailLength - 1; i > 0; i--) {
+                    positions[i * 3] = positions[(i - 1) * 3];
+                    positions[i * 3 + 1] = positions[(i - 1) * 3 + 1];
+                    positions[i * 3 + 2] = positions[(i - 1) * 3 + 2];
+                }
+                
+                // Calculate surface-crawling position with model interaction
+                const bassWave = Math.sin(userData.time * 2) * bassIntensity * 1.2;
+                const midWave = Math.sin(userData.time * 4) * midIntensity * 0.8;
+                const trebleWave = Math.sin(userData.time * 8) * trebleIntensity * 0.6;
+                
+                const waveOffset = bassWave + midWave + trebleWave;
+                const surfaceRadius = radius * (0.7 + bassIntensity * 0.6);
+                const surfaceHeight = Math.sin(userData.time * 3 + userData.surfaceOffset) * 0.3 + midIntensity * 0.4;
+                
+                // Create surface-crawling motion
+                const crawlX = Math.cos(baseAngle + waveOffset) * surfaceRadius;
+                const crawlZ = Math.sin(baseAngle + waveOffset) * surfaceRadius;
+                const crawlY = surfaceHeight + trebleIntensity * 0.3;
+                
+                const newX = modelCenter.x + crawlX;
+                const newY = modelCenter.y + crawlY;
+                const newZ = modelCenter.z + crawlZ;
+                
+                // Set new head position
+                positions[0] = newX;
+                positions[1] = newY;
+                positions[2] = newZ;
+                
+                // Update head position
+                head.position.set(newX, newY, newZ);
+                
+                // Update interaction points along the trail
+                interactionPoints.forEach((point, index) => {
+                    const pointProgress = (index + 1) / (interactionPoints.length + 1);
+                    const pointIndex = Math.floor(pointProgress * trailLength);
+                    
+                    if (pointIndex < trailLength) {
+                        const pointX = positions[pointIndex * 3];
+                        const pointY = positions[pointIndex * 3 + 1];
+                        const pointZ = positions[pointIndex * 3 + 2];
+                        
+                        point.position.set(pointX, pointY, pointZ);
+                        
+                        // Make interaction points pulse with audio
+                        const pointIntensity = bassIntensity * (1 - pointProgress) + midIntensity * pointProgress;
+                        const pointScale = 0.05 + pointIntensity * 0.1;
+                        point.scale.setScalar(pointScale);
+                        point.material.opacity = 0.6 + pointIntensity * 0.4;
+                    }
+                });
+                
+                // Update trail colors with enhanced surface crawling effect
+                const waveColor = new THREE.Color(domCache.musicWavesColor.value);
+                const glowIntensity = Number(domCache.musicWavesGlow.value);
+                
+                for (let i = 0; i < trailLength; i++) {
+                    const progress = i / trailLength;
+                    const timeOffset = userData.time + progress * 3;
+                    
+                    // Create surface-crawling intensity pattern
+                    const surfacePattern = Math.sin(progress * Math.PI * 6 + timeOffset * 2) * 0.3;
+                    const bassPattern = Math.sin(progress * Math.PI * 4 + timeOffset * 1.5) * bassIntensity * 0.6;
+                    const midPattern = Math.sin(progress * Math.PI * 8 + timeOffset * 3) * midIntensity * 0.5;
+                    const treblePattern = Math.sin(progress * Math.PI * 12 + timeOffset * 6) * trebleIntensity * 0.4;
+                    
+                    const waveIntensity = 0.5 + surfacePattern + bassPattern + midPattern + treblePattern;
+                    const alpha = (1 - progress) * waveIntensity;
+                    const audioBoost = (bassIntensity + midIntensity + trebleIntensity) * glowIntensity * (1 - progress) * 0.6;
+                    
+                    colors[i * 3] = waveColor.r * (alpha + audioBoost);
+                    colors[i * 3 + 1] = waveColor.g * (alpha + audioBoost);
+                    colors[i * 3 + 2] = waveColor.b * (alpha + audioBoost);
+                }
+                
+                // Force geometry updates
+                trail.geometry.attributes.position.needsUpdate = true;
+                trail.geometry.attributes.color.needsUpdate = true;
+                
+                // Update head with enhanced audio reactivity
+                const totalIntensity = (bassIntensity + midIntensity + trebleIntensity) / 3;
+                const headScale = 0.12 + totalIntensity * 0.5;
+                head.scale.setScalar(headScale);
+                head.material.color.copy(waveColor);
+                head.material.opacity = 1.0 + totalIntensity * 0.4;
+                
+                // Add surface crawling effect to head
+                const crawlEffect = Math.sin(userData.time * 5) * 0.02;
+                head.position.y += crawlEffect;
+            });
+        }
+        
+        // Camera Angle Panel Functions
+        function setupCameraAnglePanel() {
+            const toggle = document.getElementById('camera-angle-toggle');
+            const panel = document.getElementById('camera-angle-panel');
+            
+            toggle.addEventListener('click', () => {
+                cameraAnglePanelOpen = !cameraAnglePanelOpen;
+                toggle.classList.toggle('active', cameraAnglePanelOpen);
+                panel.classList.toggle('open', cameraAnglePanelOpen);
+                
+                if (cameraAnglePanelOpen) {
+                    // Initialize camera views if not already done
+                    if (Object.keys(cameraRenderers).length === 0) {
+                        initializeCameraViews();
+                    }
+                    setupViewDragging();
+                    // Force an immediate update of camera views
+                    setTimeout(() => {
+                        updateCameraViews(true); // force update
+                    }, 100);
+                } else {
+                    // Clean up camera views when panel is closed
+                    cleanupCameraViews();
+                }
+            });
+        }
+        
+        function cleanupCameraViews() {
+            // No need to clean up scenes since we're sharing the main scene
+            // Just ensure the panel is properly closed
+            cameraAnglePanelOpen = false;
+        }
+        
+        // Code View Panel Functions
+        function setupCodeViewPanel() {
+            const toggle = document.getElementById('code-view-toggle');
+            const panel = document.getElementById('code-view-panel');
+            
+            toggle.addEventListener('click', () => {
+                codeViewPanelOpen = !codeViewPanelOpen;
+                toggle.classList.toggle('active', codeViewPanelOpen);
+                panel.classList.toggle('open', codeViewPanelOpen);
+                
+                if (codeViewPanelOpen) {
+                    setupCodeViewDragging();
+                }
+            });
+        }
+        
+        function setupCodeViewDragging() {
+            const panel = document.getElementById('code-view-panel');
+            const header = panel.querySelector('.code-view-header');
+            const resizeHandle = panel.querySelector('.code-view-resize-handle');
+            
+            // Setup dragging via header
+            header.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                isDragging = true;
+                draggedElement = panel;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                elementStartX = parseInt(panel.style.left) || panel.offsetLeft;
+                elementStartY = parseInt(panel.style.top) || panel.offsetTop;
+                panel.style.zIndex = '1003';
+            });
+            
+            // Setup resizing via resize handle
+            resizeHandle.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                isResizing = true;
+                draggedElement = panel;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                elementStartWidth = panel.offsetWidth;
+                elementStartHeight = panel.offsetHeight;
+                panel.style.zIndex = '1003';
+            });
+        }
+        
+
+        
+        // --- Optimization: Throttle code viewer updates ---
+        let codeViewerThrottle = 0;
+        function updateCodeViewer(functionName, details = '') {
+            if (!codeViewPanelOpen) return;
+            const now = Date.now();
+            if (now - lastUpdateTime < 100) return; // Throttle updates
+            lastUpdateTime = now;
+            
+            const content = document.getElementById('code-view-content');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            // Create new code line
+            const codeLine = document.createElement('div');
+            codeLine.className = 'code-view-line active';
+            
+            let codeText = '';
+            switch(functionName) {
+                case 'updateMusicWaves':
+                    codeText = `updateMusicWaves() { // Audio-reactive wave motion`;
+                    break;
+                case 'analyzeAudio':
+                    codeText = `analyzeAudio() { // Frequency analysis: bass=${details.bass}, mid=${details.mid}, treble=${details.treble}`;
+                    break;
+                case 'updateCamera':
+                    codeText = `updateCamera() { // Audio-reactive camera movement`;
+                    break;
+                case 'updateAtmosphericParticles':
+                    codeText = `updateAtmosphericParticles() { // Particle system update`;
+                    break;
+                case 'updateProjectilesAndHealing':
+                    codeText = `updateProjectilesAndHealing() { // Projectile physics & healing simulation`;
+                    break;
+                case 'updateModelVertices':
+                    codeText = `updateModelVertices() { // Wave distortion effect`;
+                    break;
+                case 'updateLights':
+                    codeText = `updateLights() { // Dynamic lighting update`;
+                    break;
+                case 'updateModelDistortion':
+                    codeText = `updateModelDistortion() { // Wave distortion effect`;
+                    break;
+                case 'updateGlitchEffect':
+                    codeText = `updateGlitchEffect() { // Glitch shader update`;
+                    break;
+                case 'animate':
+                    codeText = `animate() { // Main render loop: time=${details.time}`;
+                    break;
+                default:
+                    codeText = `${functionName}() { // Function execution}`;
+            }
+            
+            codeLine.textContent = `[${timestamp}] ${codeText}`;
+            
+            // Add to content
+            content.appendChild(codeLine);
+            
+            // Keep only last 15 lines (no scroll, so fewer lines for better visibility)
+            while (content.children.length > 15) {
+                content.removeChild(content.firstChild);
+            }
+            
+            // Add fade effect to older lines
+            const lines = content.children;
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const age = lines.length - i;
+                const opacity = Math.max(0.3, 1 - (age * 0.05));
+                line.style.opacity = opacity;
+                
+                // Add subtle animation for new lines
+                if (age === 1) {
+                    line.style.animation = 'codeLineAppear 0.5s ease-out';
+                }
+            }
+        }
+        
+        function setupViewDragging() {
+            const views = document.querySelectorAll('.camera-view');
+            
+            views.forEach(view => {
+                const header = view.querySelector('.camera-view-header');
+                const resizeHandle = view.querySelector('.camera-view-resize-handle');
+                
+                // Setup dragging via header
+                header.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    isDragging = true;
+                    draggedElement = view;
+                    dragStartX = e.clientX;
+                    dragStartY = e.clientY;
+                    elementStartX = parseInt(view.style.left) || view.offsetLeft;
+                    elementStartY = parseInt(view.style.top) || view.offsetTop;
+                    view.style.zIndex = '1003';
+                });
+                
+                // Setup resizing via resize handle
+                resizeHandle.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    isResizing = true;
+                    draggedElement = view;
+                    dragStartX = e.clientX;
+                    dragStartY = e.clientY;
+                    elementStartWidth = view.offsetWidth;
+                    elementStartHeight = view.offsetHeight;
+                    view.style.zIndex = '1003';
+                });
+                
+                // Setup resizing observer
+                const resizeObserver = new ResizeObserver(() => {
+                    const viewType = view.getAttribute('data-view');
+                    const renderer = cameraRenderers[viewType];
+                    const camera = cameraCameras[viewType];
+                    
+                    if (renderer && camera) {
+                        const rect = view.getBoundingClientRect();
+                        renderer.setSize(rect.width, rect.height);
+                        camera.aspect = rect.width / rect.height;
+                        camera.updateProjectionMatrix();
+                    }
+                });
+                
+                resizeObserver.observe(view);
+            });
+            
+            // Global mouse move handler
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging && draggedElement) {
+                    e.preventDefault();
+                    const deltaX = e.clientX - dragStartX;
+                    const deltaY = e.clientY - dragStartY;
+                    draggedElement.style.left = (elementStartX + deltaX) + 'px';
+                    draggedElement.style.top = (elementStartY + deltaY) + 'px';
+                } else if (isResizing && draggedElement) {
+                    e.preventDefault();
+                    const deltaX = e.clientX - dragStartX;
+                    const deltaY = e.clientY - dragStartY;
+                    const newWidth = Math.max(120, elementStartWidth + deltaX);
+                    const newHeight = Math.max(80, elementStartHeight + deltaY);
+                    draggedElement.style.width = newWidth + 'px';
+                    draggedElement.style.height = newHeight + 'px';
+                }
+            });
+            
+            // Global mouse up handler
+            document.addEventListener('mouseup', () => {
+                if ((isDragging || isResizing) && draggedElement) {
+                    isDragging = false;
+                    isResizing = false;
+                    draggedElement.style.zIndex = '1001';
+                    draggedElement = null;
+                }
+            });
+        }
+        
+        function initializeCameraViews() {
+            const viewTypes = ['top', 'front', 'perspective'];
+            
+            viewTypes.forEach(viewType => {
+                if (!cameraRenderers[viewType]) {
+                    const canvas = document.getElementById(`camera-${viewType}`);
+                    const view = canvas.closest('.camera-view');
+                    const rect = view.getBoundingClientRect();
+                    
+                    const renderer = new THREE.WebGLRenderer({ 
+                        canvas: canvas, 
+                        antialias: false, // Disable antialiasing for performance
+                        alpha: true 
+                    });
+                    renderer.setSize(rect.width, rect.height);
+                    renderer.setClearColor(0x000000, 0.8);
+                    renderer.shadowMap.enabled = false; // Disable shadows for performance
+                    
+                    const camera = new THREE.PerspectiveCamera(60, rect.width / rect.height, 0.1, 1000);
+                    
+                    // Position cameras based on view type
+                    switch(viewType) {
+                        case 'top':
+                            camera.position.set(0, 15, 0);
+                            camera.lookAt(0, 0, 0);
+                            break;
+                        case 'front':
+                            camera.position.set(0, 0, 15);
+                            camera.lookAt(0, 0, 0);
+                            break;
+                        case 'perspective':
+                            camera.position.set(8, 8, 8);
+                            camera.lookAt(0, 0, 0);
+                            break;
+                    }
+                    
+                    // Use direct renderer instead of expensive post-processing
+                    cameraRenderers[viewType] = renderer;
+                    cameraCameras[viewType] = camera;
+                }
+            });
+        }
+        
+        // --- Optimization: Throttle camera view updates to 10 FPS and use direct rendering ---
+        let lastCameraViewUpdate = 0;
+        function updateCameraViews(force = false) {
+            if (!cameraAnglePanelOpen) return;
+            const now = performance.now();
+            if (!force && now - lastCameraViewUpdate < 100) return; // ~10 FPS
+            lastCameraViewUpdate = now;
+            const viewTypes = ['top', 'front', 'perspective'];
+            viewTypes.forEach(viewType => {
+                const renderer = cameraRenderers[viewType];
+                const camera = cameraCameras[viewType];
+                if (renderer && camera) {
+                    // Use direct rendering instead of composer (much faster)
+                    renderer.render(scene, camera);
+                }
+            });
+        }
         
         // --- Start Everything ---
         init();
